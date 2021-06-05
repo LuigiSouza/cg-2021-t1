@@ -34,19 +34,32 @@ public:
       }
       else
       {
-         std::cout << "tamanho " <<  mouse.moveX() << std::endl;
          float realative_x;
          float realative_y;
+
+         float proportion_x, proportion_y;
+         if (resize_pos & 1)
+         {
+            update_x[(resize_pos + 1 + 4) % 4] += mouse.moveX();
+            update_y[(resize_pos - 1 + 4) % 4] += mouse.moveY();
+         }
+         else
+         {
+            update_x[(resize_pos - 1 + 4) % 4] += mouse.moveX();
+            update_y[(resize_pos + 1 + 4) % 4] += mouse.moveY();
+         }
+         update_x[resize_pos] += mouse.moveX();
+         update_y[resize_pos] += mouse.moveY();
 
          float base_x = update_x[0];
          float base_y = update_y[0];
 
-         float proportion_x, proportion_y;
-         proportion_x = (update_x[1] - update_x[0] + mouse.moveX()) / width_box * 1.0;
-         proportion_y = (update_y[2] - update_y[1] + mouse.moveY()) / height_box * 1.0;
+         proportion_x = (update_x[1] - update_x[0]) / width_box * 1.0;
+         proportion_y = (update_y[2] - update_y[1]) / height_box * 1.0;
 
-
-         std::cout << proportion_x << " " << proportion_y << " " << update_x[1] - update_x[0]  + mouse.moveX();
+         std::cout << std::endl
+                   << "proporcao " << proportion_x << " " << proportion_y
+                   << " " << mouse.moveX();
 
          for (int i = 0; i < 4; i++)
          {
@@ -56,21 +69,9 @@ public:
             vx[i] = realative_x + base_x;
             vy[i] = realative_y + base_y;
          }
-         if (resize_pos & 1)
-         {
-            update_x[(resize_pos + 1) % 4] += mouse.moveX();
-            update_y[(resize_pos - 1) % 4] += mouse.moveY();
-         }
-         else
-         {
-            update_x[(resize_pos - 1) % 4] += mouse.moveX();
-            update_y[(resize_pos + 1) % 4] += mouse.moveY();
-         }
-         update_x[resize_pos] += mouse.moveX();
-         update_y[resize_pos] += mouse.moveY();
 
          midle_x += mouse.moveX() / 2 * 1.0;
-         up_y = update_y[0] > update_y[2] ? update_y[0] + 10 : up_y + mouse.moveY();
+         up_y = update_y[0] > update_y[2] ? update_y[0] + 10 : update_y[2] + 10;
       }
    }
 
