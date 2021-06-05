@@ -2,6 +2,9 @@
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
 
+#define RADIUS_BALL 5
+#define MIN_EDGE 5
+
 class Shape
 {
 public:
@@ -9,6 +12,8 @@ public:
    virtual void render(void) = 0;
    virtual void rotate(void) = 0;
    virtual void update(Mouse) = 0;
+   virtual void releaseMouse(void) = 0;
+   virtual bool checkUpdateShape(Mouse) = 0;
    virtual bool isInside(float x, float y) = 0;
    void color(float r, float g, float b)
    {
@@ -20,13 +25,13 @@ public:
    {
       CV::color(0.5f + (1 + cos(this->gold)) / 4, 0.5f + (1 + cos(this->gold)) / 4, 0);
       this->gold += 0.05;
-      CV::polygon(vx, vy, elems);
+      CV::polygon(vx, vy, 4);
       CV::color(1, 1, 1);
-      for (int i = 0; i < elems; i++)
+      for (int i = 0; i < 4; i++)
       {
-         CV::circleFill(vx[i], vy[i], 5, 10);
+         CV::circleFill(update_x[i], update_y[i], RADIUS_BALL, 10);
       }
-      CV::circleFill(midle_x, 10 + this->up_y, 5, 10);
+      CV::circleFill(midle_x, this->up_y, RADIUS_BALL, 10);
    }
 
 protected:
@@ -34,8 +39,16 @@ protected:
    float *vy;
    int elems;
 
+   float update_x[4];
+   float update_y[4];
+   float width_box;
+   float height_box;
+
    float midle_x;
    float up_y;
+
+   float *draw_x;
+   float *draw_y;
 
    bool fill_flag = true;
 

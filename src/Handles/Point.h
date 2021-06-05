@@ -14,13 +14,12 @@ private:
       float y;
    };
 
-public:
    // Code extracted From:
    // https://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/
 
    // Given three colinear points p, q, r, the function checks if
    // point q lies on line segment 'pr'
-   bool onSegment(t_Point p, t_Point q, t_Point r)
+   static bool onSegment(t_Point p, t_Point q, t_Point r)
    {
       if (q.x <= std::max(p.x, r.x) && q.x >= std::min(p.x, r.x) &&
           q.y <= std::max(p.y, r.y) && q.y >= std::min(p.y, r.y))
@@ -33,7 +32,7 @@ public:
    // 0 --> p, q and r are colinear
    // 1 --> Clockwise
    // 2 --> Counterclockwise
-   int orientation(t_Point p, t_Point q, t_Point r)
+   static int orientation(t_Point p, t_Point q, t_Point r)
    {
       int val = (q.y - p.y) * (r.x - q.x) -
                 (q.x - p.x) * (r.y - q.y);
@@ -45,7 +44,7 @@ public:
 
    // The function that returns true if line segment 'p1q1'
    // and 'p2q2' intersect.
-   bool doIntersect(t_Point p1, t_Point q1, t_Point p2, t_Point q2)
+   static bool doIntersect(t_Point p1, t_Point q1, t_Point p2, t_Point q2)
    {
       // Find the four orientations needed for general and
       // special cases
@@ -77,7 +76,9 @@ public:
 
       return false; // Doesn't fall in any of the above cases
    }
-   bool isInside(float x, float y, int n, float vx[], float vy[])
+
+public:
+   static bool isInside(float x, float y, int n, float vx[], float vy[])
    {
       // Create a point for line segment from p to infinite
       t_Point extreme = {2000, y};
@@ -107,6 +108,10 @@ public:
       } while (i != 0);
 
       return count & 1; // Same as (count%2 == 1);
+   }
+   static float distance(float x1, float y1, float x2, float y2)
+   {
+      return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) * 1.0);
    }
 };
 

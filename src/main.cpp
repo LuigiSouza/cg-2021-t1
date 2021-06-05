@@ -48,18 +48,9 @@ float r = 0.23;
 
 std::list<Shape *> shapes;
 
-// void DrawMouseScreenCoords()
-// {
-//    char str[100];
-//    sprintf(str, "Mouse: (%d,%d)", mouseX, mouseY);
-//    CV::text(10, 500, str);
-//    sprintf(str, "Screen: (%d,%d)", screenWidth, screenHeight);
-//    CV::text(10, 520, str);
-// }
-
 void update()
 {
-   if (Drag != nullptr)
+   if (Drag)
    {
       Drag->update(*mouse_state);
    }
@@ -90,7 +81,7 @@ void render()
       (*it)->render();
    }
 
-   if (Choose != nullptr)
+   if (Choose)
    {
       Choose->high_light();
    }
@@ -106,14 +97,8 @@ void keyboard(int key)
    case 27: //finaliza programa
       exit(0);
       break;
-
-   case 201: //seta para cima
-      break;
-
-   case 203: //seta para a baixo
-      break;
-
-   case 202: //seta para direita
+   case 214:
+      mouse_state->setCtrl(true);
       break;
    }
 }
@@ -121,6 +106,13 @@ void keyboard(int key)
 void keyboardUp(int key)
 {
    printf("\nLiberou tecla: %d", key);
+
+   switch (key)
+   {
+   case 214:
+      mouse_state->setCtrl(false);
+      break;
+   }
 }
 
 //funcao para tratamento de mouse: cliques, movimentos e arrastos
@@ -138,16 +130,18 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
       mouse_state->update(button);
       if (state == 1)
       {
+         if (Choose)
+            Choose->releaseMouse();
          Choose = Drag;
-         if (Drag != nullptr)
-         {
-            shapes.remove(Drag);
-            shapes.push_front(Choose);
-         }
          Drag = nullptr;
       }
       else if (state == 0)
       {
+         if (Choose && Choose->checkUpdateShape(*mouse_state))
+         {
+            Drag = Choose;
+            return;
+         }
          for (auto it = shapes.begin(); it != shapes.end(); ++it)
          {
             if ((*it)->isInside(mouse_state->getX(), mouse_state->getY()))
@@ -172,10 +166,13 @@ int main(void)
 
    Square *sq1 = new Square(200, 200, 100, 100);
    Square *sq2 = new Square(250, 250, 100, 100);
+   Square *sq3 = new Square(300, 300, 100, 100);
    sq1->color(1, 0, 0);
    sq2->color(0, 1, 0);
+   sq3->color(0, 0, 1);
    shapes.push_front(sq1);
    shapes.push_front(sq2);
+   shapes.push_front(sq3);
 
    mouse_state = new Mouse();
 

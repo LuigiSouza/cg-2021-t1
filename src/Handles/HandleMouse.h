@@ -11,6 +11,7 @@ private:
     float pos_y;
     float prev_pos_x;
     float prev_pos_y;
+    bool ctrl = false;
 
 public:
     Mouse(void);
@@ -19,10 +20,12 @@ public:
     void update(int index);
     void setX(float x);
     void setY(float y);
-    float getX();
-    float getY();
-    float moveX();
-    float moveY();
+    float getX(void);
+    float getY(void);
+    float moveX(void);
+    float moveY(void);
+    void setCtrl(bool ctrl);
+    bool getCtrl(void);
 };
 
 #endif

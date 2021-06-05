@@ -12,6 +12,9 @@ class Square : public Shape
 {
 private:
    float angle = 0.2;
+   bool updateShape = false;
+   int resize_pos;
+
 public:
    void render(void)
    {
@@ -22,24 +25,80 @@ public:
          CV::polygon(vx, vy, elems);
       CV::color(1, 1, 1);
    }
-   void update(Mouse mouse)
-   {
-      float max_x = vx[0];
-      float min_x = vx[0];
-      float max_y = vy[0];
 
+   void resize_shape(Mouse mouse)
+   {
+      if (resize_pos == -1)
+      {
+         std::cout << "girar" << std::endl;
+      }
+      else
+      {
+         std::cout << "tamanho " <<  mouse.moveX() << std::endl;
+         float realative_x;
+         float realative_y;
+
+         float base_x = update_x[0];
+         float base_y = update_y[0];
+
+         float proportion_x, proportion_y;
+         proportion_x = (update_x[1] - update_x[0] + mouse.moveX()) / width_box * 1.0;
+         proportion_y = (update_y[2] - update_y[1] + mouse.moveY()) / height_box * 1.0;
+
+
+         std::cout << proportion_x << " " << proportion_y << " " << update_x[1] - update_x[0]  + mouse.moveX();
+
+         for (int i = 0; i < 4; i++)
+         {
+            realative_x = draw_x[i] * proportion_x * 1.0;
+            realative_y = draw_y[i] * proportion_y * 1.0;
+
+            vx[i] = realative_x + base_x;
+            vy[i] = realative_y + base_y;
+         }
+         if (resize_pos & 1)
+         {
+            update_x[(resize_pos + 1) % 4] += mouse.moveX();
+            update_y[(resize_pos - 1) % 4] += mouse.moveY();
+         }
+         else
+         {
+            update_x[(resize_pos - 1) % 4] += mouse.moveX();
+            update_y[(resize_pos + 1) % 4] += mouse.moveY();
+         }
+         update_x[resize_pos] += mouse.moveX();
+         update_y[resize_pos] += mouse.moveY();
+
+         midle_x += mouse.moveX() / 2 * 1.0;
+         up_y = update_y[0] > update_y[2] ? update_y[0] + 10 : up_y + mouse.moveY();
+      }
+   }
+
+   void move_shape(Mouse mouse)
+   {
       for (int i = 0; i < elems; i++)
       {
-         vx[i] = vx[i] + mouse.moveX();
-         vy[i] = vy[i] + mouse.moveY();
-
-         max_x = max_x < vx[i] ? vx[i] : max_x;
-         min_x = min_x > vx[i] ? vx[i] : min_x;
-         max_y = max_y < vy[i] ? vy[i] : max_y;
+         vx[i] += mouse.moveX();
+         vy[i] += mouse.moveY();
+         update_x[i] += mouse.moveX();
+         update_y[i] += mouse.moveY();
       }
-      up_y = max_y;
-      midle_x = (max_x + min_x) / 2;
+      up_y += mouse.moveY();
+      midle_x += mouse.moveX();
    }
+
+   void update(Mouse mouse)
+   {
+      if (updateShape)
+      {
+         resize_shape(mouse);
+      }
+      else
+      {
+         move_shape(mouse);
+      }
+   }
+
    void fill(void)
    {
       this->fill_flag = !fill_flag;
@@ -47,8 +106,7 @@ public:
 
    bool isInside(float x, float y)
    {
-      Point p;
-      return p.isInside(x, y, elems, vx, vy);
+      return Point::isInside(x, y, elems, vx, vy);
    }
 
    void rotate(void)
@@ -77,19 +135,56 @@ public:
    {
       vx = new float[4];
       vy = new float[4];
+      draw_x = new float[4];
+      draw_y = new float[4];
+      width_box = width;
+      height_box = height;
       elems = 4;
 
       midle_x = (2 * x + width) / 2;
-      up_y = y + height;
+      up_y = 10 + y + height;
 
-      vx[0] = x;
-      vy[0] = y;
-      vx[1] = x + width;
-      vy[1] = y;
-      vx[2] = x + width;
-      vy[2] = y + width;
-      vx[3] = x;
-      vy[3] = y + height;
+      draw_x[0] = vx[0] = update_x[0] = x;
+      draw_y[0] = vy[0] = update_y[0] = y;
+      draw_x[1] = vx[1] = update_x[1] = x + width;
+      draw_y[1] = vy[1] = update_y[1] = y;
+      draw_x[2] = vx[2] = update_x[2] = x + width;
+      draw_y[2] = vy[2] = update_y[2] = y + width;
+      draw_x[3] = vx[3] = update_x[3] = x;
+      draw_y[3] = vy[3] = update_y[3] = y + height;
+
+      for (int i = 0; i < elems; i++)
+      {
+         draw_x[i] -= vx[0];
+         draw_y[i] -= vy[0];
+      }
+   }
+
+   bool checkUpdateShape(Mouse mouse)
+   {
+      for (int i = 0; i < 4; i++)
+      {
+         if (Point::distance(mouse.getX(), mouse.getY(), update_x[i], update_y[i]) < RADIUS_BALL)
+         {
+            std::cout << " entrou no " << update_x[i] << " " << update_y[i] << std::endl;
+            resize_pos = i;
+            updateShape = true;
+            return true;
+         }
+      }
+      if (Point::distance(mouse.getX(), mouse.getY(), midle_x, up_y) < RADIUS_BALL)
+      {
+         std::cout << " entrou no topo " << std::endl;
+         resize_pos = -1;
+         updateShape = true;
+         return true;
+      }
+      return false;
+   }
+
+   void releaseMouse(void)
+   {
+      updateShape = false;
    }
 };
 
