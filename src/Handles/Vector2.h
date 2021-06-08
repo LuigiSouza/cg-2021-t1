@@ -24,6 +24,12 @@ public:
        y = _y;
    }
 
+   void set(Vector2 vec)
+   {
+       x = vec.x;
+       y = vec.y;
+   }
+
    void normalize()
    {
        float norm = (float)sqrt(x*x + y*y);
@@ -48,6 +54,12 @@ public:
    Vector2 operator + (const Vector2& v)
    {
        Vector2 aux( x + v.x, y + v.y);
+       return( aux );
+   }
+
+   Vector2 operator * (const Vector2& v)
+   {
+       Vector2 aux( x * v.x, y * v.y);
        return( aux );
    }
 

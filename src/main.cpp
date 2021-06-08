@@ -31,6 +31,7 @@
 
 #include "Shapes/Polygon_shape.h"
 #include "Shapes/Square_shape.h"
+#include "Shapes/Triangle_shape.h"
 
 //variaveis globais
 
@@ -144,7 +145,7 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
          }
          for (auto it = shapes.begin(); it != shapes.end(); ++it)
          {
-            if ((*it)->isInside(mouse_state->getX(), mouse_state->getY()))
+            if ((*it)->isInside(*mouse_state))
             {
                Drag = (*it);
                shapes.remove(*it);
@@ -170,14 +171,17 @@ int main(void)
    float vx[] = {200, 250, 300};
    float vy[] = {200, 200, 300};
    Polygon_shape *sq4 = new Polygon_shape(vx, vy, 3);
+   Triangle_shape *sq5 = new Triangle_shape(300, 300, 100, 100);
    sq1->color(1, 0, 0);
    sq2->color(0, 1, 0);
    sq3->color(0, 0, 1);
    sq4->color(0, 1, 1);
+   sq5->color(1, 1, 0);
    shapes.push_front(sq1);
    shapes.push_front(sq2);
    shapes.push_front(sq3);
    shapes.push_front(sq4);
+   shapes.push_front(sq5);
 
    mouse_state = new Mouse();
 

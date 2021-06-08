@@ -2,6 +2,7 @@
 #define __POINT_H__
 
 #include <iostream>
+#include "Vector2.h"
 // Define Infinite (Using INT_MAX caused overflow problems)
 #define INF 10000
 
@@ -78,17 +79,18 @@ private:
    }
 
 public:
-   static void perpendicular(float vector_x1, float vector_y1, float vector_x2, float vector_y2, float x3, float y3, float *retx, float *rety)
+   static Vector2 perpendicular(Vector2 vec1, Vector2 vec2, float px, float py)
    {
-      float k = ((vector_y2 - vector_y1) * (x3 - vector_x1) - (vector_x2 - vector_x1) * (y3 - vector_y1)) / ((vector_y2 - vector_y1) * (vector_y2 - vector_y1) + (vector_x2 - vector_x1) * (vector_x2 - vector_x1) * 1.0);
-      *retx = x3 - k * (vector_y2 - vector_y1) * 1.0;
-      *rety = y3 + k * (vector_x2 - vector_x1) * 1.0;
+      float k = ((vec2.y - vec1.y) * (px - vec1.x) - (vec2.x - vec1.x) * (py - vec1.y)) / ((vec2.y - vec1.y) * (vec2.y - vec1.y) + (vec2.x - vec1.x) * (vec2.x - vec1.x) * 1.0);
+
+      return Vector2(px - k * (vec2.y - vec1.y) * 1.0,
+                         py + k * (vec2.x - vec1.x) * 1.0);
    }
 
-   static void rotate(float x, float y, float angle, float *retx, float *rety)
+   static Vector2 rotate(float x, float y, float angle)
    {
-      *retx = x * cos(angle) - y * sin(angle);
-      *rety = x * sin(angle) + y * cos(angle);
+      return Vector2(x * cos(angle) - y * sin(angle),
+                         x * sin(angle) + y * cos(angle));
    }
 
    static float getAngle(float x1, float y1, float x2, float y2, float base_x, float base_y)
