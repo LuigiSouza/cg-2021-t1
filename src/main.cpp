@@ -29,7 +29,8 @@
 
 #include "Handles/HandleMouse.h"
 
-#include "Shapes/Square.h"
+#include "Shapes/Polygon_shape.h"
+#include "Shapes/Square_shape.h"
 
 //variaveis globais
 
@@ -163,15 +164,20 @@ int main(void)
    bmp = new Bmp("azag.bmp");
    bmp->convertBGRtoRGB();
 
-   Square *sq1 = new Square(200, 200, 100, 100);
-   Square *sq2 = new Square(250, 250, 100, 100);
-   Square *sq3 = new Square(300, 300, 100, 100);
+   Square_shape *sq1 = new Square_shape(200, 200, 100, 100);
+   Square_shape *sq2 = new Square_shape(250, 250, 100, 100);
+   Square_shape *sq3 = new Square_shape(300, 300, 100, 100);
+   float vx[] = {200, 250, 300};
+   float vy[] = {200, 200, 300};
+   Polygon_shape *sq4 = new Polygon_shape(vx, vy, 3);
    sq1->color(1, 0, 0);
    sq2->color(0, 1, 0);
    sq3->color(0, 0, 1);
+   sq4->color(0, 1, 1);
    shapes.push_front(sq1);
    shapes.push_front(sq2);
    shapes.push_front(sq3);
+   shapes.push_front(sq4);
 
    mouse_state = new Mouse();
 

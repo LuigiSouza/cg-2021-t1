@@ -49,7 +49,7 @@
 		<Unit filename="src/Imagem.h" />
 		<Unit filename="src/Shapes/Botao.h" />
 		<Unit filename="src/Shapes/Shape.h" />
-		<Unit filename="src/Shapes/Square.h" />
+		<Unit filename="src/Shapes/Square_shape.h" />
 		<Unit filename="src/bmp.cpp" />
 		<Unit filename="src/gl_canvas2d.cpp" />
 		<Unit filename="src/gl_canvas2d.h" />
