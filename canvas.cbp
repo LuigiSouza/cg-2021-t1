@@ -46,6 +46,8 @@
 		<Unit filename="include/GL/glut.h" />
 		<Unit filename="src/Bmp.h" />
 		<Unit filename="src/Handles/HandleMouse.cpp" />
+		<Unit filename="src/Handles/Point.h" />
+		<Unit filename="src/Handles/Vector2.h" />
 		<Unit filename="src/Imagem.h" />
 		<Unit filename="src/Shapes/Botao.h" />
 		<Unit filename="src/Shapes/Polygon_shape.h" />

@@ -33,18 +33,11 @@
 #include "Shapes/Square_shape.h"
 #include "Shapes/Triangle_shape.h"
 
-//variaveis globais
-
 int screenWidth = 800, screenHeight = 680;
-Bmp *bmp;
 Mouse *mouse_state;
 
 Shape *Drag;
 Shape *Choose;
-
-float angle = 0.05;
-float vx[] = {-50, 50, 50, -50};
-float vy[] = {-50, -50, 50, 50};
 
 float r = 0.23;
 
@@ -64,19 +57,6 @@ void render()
 {
    CV::clear(0, 0, 0);
    CV::color(1, 1, 1);
-
-   //angle -= 0.05;
-
-   for (int i = 0; i < 4; i++)
-   {
-      float x = vx[i];
-      vx[i] = x * cos(angle) - vy[i] * sin(angle);
-      vy[i] = x * sin(angle) + vy[i] * cos(angle);
-   }
-
-   CV::translate(200, 200);
-   CV::polygon(vx, vy, 4);
-   CV::translate(0, 0);
 
    for (auto it = shapes.rbegin(); it != shapes.rend(); ++it)
    {
@@ -111,6 +91,35 @@ void keyboardUp(int key)
 
    switch (key)
    {
+   case 43:
+      if (Choose)
+      {
+         for (auto it = ++shapes.begin(); it != shapes.end(); ++it)
+         {
+            if ((*it) == Choose)
+            {
+               shapes.remove(Choose);
+               shapes.emplace(--it, Choose);
+               break;
+            }
+         }
+      }
+      break;
+   case 45:
+      if (Choose)
+      {
+         for (auto it = shapes.begin(); it != --shapes.end(); ++it)
+         {
+            if ((*it) == Choose)
+            {
+               auto aux = ++it;
+               shapes.remove(Choose);
+               shapes.emplace(++aux, Choose);
+               break;
+            }
+         }
+      }
+      break;
    case 214:
       mouse_state->setCtrl(false);
       break;
@@ -148,8 +157,6 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
             if ((*it)->isInside(*mouse_state))
             {
                Drag = (*it);
-               shapes.remove(*it);
-               shapes.push_front(Drag);
                Choose = Drag;
                break;
             }
@@ -162,15 +169,12 @@ int main(void)
 {
    CV::init(&screenWidth, &screenHeight, "Teste trabalho 1");
 
-   bmp = new Bmp("azag.bmp");
-   bmp->convertBGRtoRGB();
-
    Square_shape *sq1 = new Square_shape(200, 200, 100, 100);
    Square_shape *sq2 = new Square_shape(250, 250, 100, 100);
    Square_shape *sq3 = new Square_shape(300, 300, 100, 100);
-   float vx[] = {200, 250, 300};
-   float vy[] = {200, 200, 300};
-   Polygon_shape *sq4 = new Polygon_shape(vx, vy, 3);
+   float vx[] = {200, 250, 300, 350, 380};
+   float vy[] = {200, 300, 300, 400, 400};
+   Polygon_shape *sq4 = new Polygon_shape(vx, vy, 5);
    Triangle_shape *sq5 = new Triangle_shape(300, 300, 100, 100);
    sq1->color(1, 0, 0);
    sq2->color(0, 1, 0);

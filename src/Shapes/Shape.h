@@ -56,12 +56,14 @@ private:
 
    virtual void resize_shape(Mouse mouse)
    {
+      // Update settings square 
       for (int i = -1; i <= 1; i += 2)
       {
          Vector2 aux_base = Vector2(
              update_x[(resize_pos + i + 4) % 4] - update_base[(resize_pos + i + 4) % 4].x,
              update_y[(resize_pos + i + 4) % 4] - update_base[(resize_pos + i + 4) % 4].y);
 
+         // Calculate adjacent vertices when updating another one
          Vector2 ret = Point::perpendicular(
              update_base[(resize_pos + i + 4) % 4] + aux_base,
              update_base[(resize_pos + 2) % 4] + aux_base,
@@ -74,9 +76,11 @@ private:
       update_x[resize_pos] += mouse.moveX();
       update_y[resize_pos] += mouse.moveY();
 
+      // Base coords to convert to (0, 0)
       float base_x = update_x[0];
       float base_y = update_y[0];
 
+      // Calculate resize ratio based on coordinates (0,0)
       Vector2 dist_side_to_center = Vector2(
           Point::distance(update_x[1] - base_x, update_y[1] - base_y, 0, 0),
           Point::distance(update_x[3] - base_x, update_y[3] - base_y, 0, 0));
@@ -91,13 +95,11 @@ private:
       float dist_side_to_side_x = Point::distance(update_x[1] - base_x, update_y[1] - base_y, point1.x, point1.y);
       float dist_side_to_side_y = Point::distance(update_x[3] - base_x, update_y[3] - base_y, point2.x, point2.y);
 
-      std::cout << " dit: " << dist_side_to_center.x << " " << dist_side_to_center.y << std::endl;
-      std::cout << " propo2: " << dist_side_to_side_x << " " << dist_side_to_side_y << std::endl;
-
       proportion.set(
           dist_side_to_side_x > std::max(dist_side_to_center.x, width_box) ? proportion.x * -1 : proportion.x,
           dist_side_to_side_y > std::max(dist_side_to_center.y, height_box) ? proportion.y * -1 : proportion.y);
 
+      // Update coordinates
       for (int i = 0; i < elems; i++)
       {
          Vector2 relative = draw[i] * proportion;
