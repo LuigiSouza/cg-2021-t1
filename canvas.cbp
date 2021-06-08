@@ -48,6 +48,7 @@
 		<Unit filename="src/Handles/HandleMouse.cpp" />
 		<Unit filename="src/Imagem.h" />
 		<Unit filename="src/Shapes/Botao.h" />
+		<Unit filename="src/Shapes/Polygon_shape.h" />
 		<Unit filename="src/Shapes/Shape.h" />
 		<Unit filename="src/Shapes/Square_shape.h" />
 		<Unit filename="src/bmp.cpp" />

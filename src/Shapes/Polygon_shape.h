@@ -38,19 +38,25 @@ public:
       up_y = (miny + maxy) / 2;
       width_box = (maxx - minx);
       height_box = (maxy - miny);
-      update_x[0] = minx;
-      update_y[0] = miny;
-      update_x[1] = maxx;
-      update_y[1] = miny;
-      update_x[2] = maxx;
-      update_y[2] = maxy;
-      update_x[3] = minx;
-      update_y[3] = maxy;
+
+      update_x_base[0] = update_x[0] = minx;
+      update_y_base[0] = update_y[0] = miny;
+      update_x_base[1] = update_x[1] = maxx;
+      update_y_base[1] = update_y[1] = miny;
+      update_x_base[2] = update_x[2] = maxx;
+      update_y_base[2] = update_y[2] = maxy;
+      update_x_base[3] = update_x[3] = minx;
+      update_y_base[3] = update_y[3] = maxy;
 
       for (int i = 0; i < elems; i++)
       {
          draw_x[i] -= vx[0];
          draw_y[i] -= vy[0];
+      }
+      for (int i = 0; i < 4; i++)
+      {
+         update_x_base[i] = update_x_base[i] - vx[0];
+         update_y_base[i] = update_y_base[i] - vy[0];
       }
    }
 };

@@ -78,6 +78,32 @@ private:
    }
 
 public:
+   static void perpendicular(float vector_x1, float vector_y1, float vector_x2, float vector_y2, float x3, float y3, float *retx, float *rety)
+   {
+      float k = ((vector_y2 - vector_y1) * (x3 - vector_x1) - (vector_x2 - vector_x1) * (y3 - vector_y1)) / ((vector_y2 - vector_y1) * (vector_y2 - vector_y1) + (vector_x2 - vector_x1) * (vector_x2 - vector_x1) * 1.0);
+      *retx = x3 - k * (vector_y2 - vector_y1) * 1.0;
+      *rety = y3 + k * (vector_x2 - vector_x1) * 1.0;
+   }
+
+   static void rotate(float x, float y, float angle, float *retx, float *rety)
+   {
+      *retx = x * cos(angle) - y * sin(angle);
+      *rety = x * sin(angle) + y * cos(angle);
+   }
+
+   static float getAngle(float x1, float y1, float x2, float y2, float base_x, float base_y)
+   {
+      float vectorA_x = x1 - base_x;
+      float vectorA_y = y1 - base_y;
+      float vectorB_x = x2 - base_x;
+      float vectorB_y = y2 - base_y;
+
+      float dot_product = vectorA_x * vectorB_x + vectorA_y * vectorB_y * 1.0;
+      float croos_product = vectorA_x * vectorB_y - vectorA_y * vectorB_x * 1.0;
+      float angle = atan2(fabs(croos_product), dot_product);
+
+      return croos_product < 0 ? angle * -1.0 : angle;
+   }
    static bool isInside(float x, float y, int n, float vx[], float vy[])
    {
       // Create a point for line segment from p to infinite
