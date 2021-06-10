@@ -13,8 +13,8 @@ class Shape
 private:
    virtual void rotate_shape(Mouse mouse)
    {
-      float base_x = vx[0];
-      float base_y = vy[0];
+      float base_x = update_x[0];
+      float base_y = update_y[0];
 
       float vector_x = midle_x - base_x;
       float vector_y = up_y - base_y;
@@ -56,7 +56,7 @@ private:
 
    virtual void resize_shape(Mouse mouse)
    {
-      // Update settings square 
+      // Update settings square
       for (int i = -1; i <= 1; i += 2)
       {
          Vector2 aux_base = Vector2(
@@ -109,8 +109,10 @@ private:
          vx[i] = rotate.x + base_x;
          vy[i] = rotate.y + base_y;
       }
-      midle_x = ((update_x[2] + update_x[3]) / 2) + sin(angle) * 10 * -1.0;
-      up_y = ((update_y[2] + update_y[3]) / 2) + cos(angle) * 10 * 1.0;
+      float up_or_down_x = proportion.y < 0 ? -10 : 10;
+      float up_or_down_y = proportion.y < 0 ? -10 : 10;
+      midle_x = ((update_x[2] + update_x[3]) / 2) + sin(angle) * up_or_down_x * -1.0;
+      up_y = ((update_y[2] + update_y[3]) / 2) + cos(angle) * up_or_down_y * 1.0;
    }
 
    virtual void update_shape(Mouse mouse)
@@ -193,7 +195,7 @@ public:
    // Change fill of shape
    virtual void fill(void)
    {
-      this->fill_flag = !fill_flag;
+      this->fill_flag = !this->fill_flag;
    }
 
    // Checks if mouse is inside of shape

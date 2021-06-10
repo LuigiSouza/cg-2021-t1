@@ -48,13 +48,15 @@ public:
       update_x[3] = minx;
       update_y[3] = maxy;
 
+      float base_x = update_x[0];
+      float base_y = update_y[0];
       for (int i = 0; i < elems; i++)
       {
-         draw[i].set(vx[i] - vx[0], vy[i] - vy[0]);
+         draw[i].set(vx[i] - base_x, vy[i] - base_y);
       }
       for (int i = 0; i < 4; i++)
       {
-         update_base[i].set(update_x[i] - vx[0], update_y[i] - vy[0]);
+         update_base[i].set(update_x[i] - base_x, update_y[i] - base_y);
       }
    }
 };
