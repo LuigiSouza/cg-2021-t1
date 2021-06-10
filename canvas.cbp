@@ -49,10 +49,13 @@
 		<Unit filename="src/Handles/Point.h" />
 		<Unit filename="src/Handles/Vector2.h" />
 		<Unit filename="src/Imagem.h" />
+		<Unit filename="src/Panel/Botao.h" />
+		<Unit filename="src/Panel/Panel.h" />
 		<Unit filename="src/Shapes/Botao.h" />
 		<Unit filename="src/Shapes/Polygon_shape.h" />
 		<Unit filename="src/Shapes/Shape.h" />
 		<Unit filename="src/Shapes/Square_shape.h" />
+		<Unit filename="src/Shapes/Triangle_shape.h" />
 		<Unit filename="src/bmp.cpp" />
 		<Unit filename="src/gl_canvas2d.cpp" />
 		<Unit filename="src/gl_canvas2d.h" />
