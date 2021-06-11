@@ -42,12 +42,42 @@ Mouse *mouse_state;
 Shape *Drag;
 Shape *Choose;
 
+bool click = false;
+
 float r = 0.23;
 
 int fps = 0;
 
 std::list<Shape *> shapes;
 std::list<Panel *> panels;
+
+void create_panel()
+{
+   float offset = 10;
+   float panel_w = screenWidth / 2;
+   float panel_h = 150;
+   float panel_x = screenHeight / 3 - offset;
+   float panel_y = screenHeight - panel_h - offset;
+
+   Panel *panel = new Panel(panel_x, panel_y, panel_w, panel_h);
+
+   panel->addButton(offset, 115, 30, 30, QUADRADO);
+   panel->addButton(offset, 80, 30, 30, TRIANGULO);
+   panel->addButton(offset, 45, 30, 30, CIRCULO);
+   panel->addButton(offset, 10, 30, 30, POLIGONO);
+
+   panel->addButton(panel_w - 60, 115, 50, 30, ELEVAR);
+   panel->addButton(panel_w - 60, 80, 50, 30, ABAIXAR);
+   panel->addButton(panel_w - 60, 45, 50, 30, DELETAR);
+   panel->addButton(panel_w - 60, 10, 50, 30, PREENCHER);
+
+   for (int i = 0; i < 16; i++)
+   {
+      panel->addButton(((int)i / 4) * 40 + (panel_w / 4), ((i % 4) * 35) + 10, 40, 30, COR);
+   }
+
+   panels.push_front(panel);
+}
 
 void update()
 {
@@ -69,14 +99,14 @@ void render()
       (*it)->render();
    }
 
-   for (auto it = panels.begin(); it != panels.end(); ++it)
-   {
-      (*it)->render();
-   }
-
    if (Choose)
    {
       Choose->high_light();
+   }
+
+   for (auto it = panels.begin(); it != panels.end(); ++it)
+   {
+      (*it)->render();
    }
 }
 
@@ -102,38 +132,81 @@ void keyboardUp(int key)
 
    switch (key)
    {
-   case 43:
-      if (Choose)
-      {
-         for (auto it = ++shapes.begin(); it != shapes.end(); ++it)
-         {
-            if ((*it) == Choose)
-            {
-               shapes.remove(Choose);
-               shapes.emplace(--it, Choose);
-               break;
-            }
-         }
-      }
-      break;
-   case 45:
-      if (Choose)
-      {
-         for (auto it = shapes.begin(); it != --shapes.end(); ++it)
-         {
-            if ((*it) == Choose)
-            {
-               auto aux = ++it;
-               shapes.remove(Choose);
-               shapes.emplace(++aux, Choose);
-               break;
-            }
-         }
-      }
-      break;
    case 214:
       mouse_state->setCtrl(false);
       break;
+   }
+}
+
+void check_panel()
+{
+   for (auto it = panels.begin(); it != panels.end(); ++it)
+   {
+      Botao *ret = (*it)->isInside(*mouse_state);
+
+      if (ret == nullptr)
+         continue;
+
+      switch (ret->get_function())
+      {
+      case ELEVAR:
+         if (Choose)
+         {
+            for (auto it = ++shapes.begin(); it != shapes.end(); ++it)
+            {
+               if ((*it) == Choose)
+               {
+                  shapes.remove(Choose);
+                  shapes.emplace(--it, Choose);
+                  break;
+               }
+            }
+         }
+         break;
+      case ABAIXAR:
+         if (Choose)
+         {
+            for (auto it = shapes.begin(); it != --shapes.end(); ++it)
+            {
+               if ((*it) == Choose)
+               {
+                  auto aux = ++it;
+                  shapes.remove(Choose);
+                  shapes.emplace(++aux, Choose);
+                  break;
+               }
+            }
+         }
+         break;
+      case PREENCHER:
+         if (Choose)
+         {
+            Choose->fill();
+         }
+         break;
+      case DELETAR:
+         if (Choose)
+         {
+            Drag = nullptr;
+            shapes.remove(Choose);
+            delete Choose;
+            Choose = nullptr;
+         }
+      case COR:
+         if (Choose)
+         {
+            float *rgb = ret->get_rgb();
+            Choose->color(rgb[0], rgb[1], rgb[2]);
+            delete rgb;
+         }
+         break;
+      
+      default:
+         std::cout << "Funcao Desconhecida..." << std::endl;
+         exit(1);
+         break;
+      }
+      click = true;
    }
 }
 
@@ -151,13 +224,17 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
    {
       if (state == 1)
       {
-         if (Choose)
-            Choose->releaseMouse();
-         Choose = Drag;
-         Drag = nullptr;
+         if (!click)
+         {
+            Choose = Drag;
+            Drag = nullptr;
+         }
+         click = false;
       }
       else if (state == 0)
       {
+         check_panel();
+
          if (Choose && Choose->checkUpdateShape(*mouse_state))
          {
             Drag = Choose;
@@ -181,8 +258,7 @@ int main(void)
    CV::init(&screenWidth, &screenHeight, "Teste trabalho 1");
 
    Square_shape *sq1 = new Square_shape(200, 200, 100, 100);
-   Circle_shape *sq2 = new Circle_shape(100, 100, 50, 20);
-   sq1->fill();
+   Circle_shape *sq2 = new Circle_shape(100, 100, 50, 30);
    Triangle_shape *sq5 = new Triangle_shape(300, 300, 100, 100);
    sq1->color(1, 0, 0);
    sq2->color(0, 0, 1);
@@ -191,26 +267,7 @@ int main(void)
    shapes.push_front(sq2);
    shapes.push_front(sq5);
 
-   float offset = 10;
-   float panel_w = screenWidth / 2;
-   float panel_h = 150;
-   float panel_x = screenHeight / 3 - offset;
-   float panel_y = screenHeight - panel_h - offset;
-
-   Panel *panel = new Panel(panel_x, panel_y, panel_w, panel_h);
-   float square_x[] = {10, 20, 20, 10};
-   float square_y[] = {10, 10, 20, 20};
-   panel->addButton(10, 10, 30, 30, square_x, square_y, 4);
-   float triangle_x[] = {10, 20, 15};
-   float triangle_y[] = {10, 10, 20};
-   panel->addButton(10, 45, 30, 30, triangle_x, triangle_y, 3);
-   panel->addButton(10, 80, 100, 25, "Circulo");
-   panel->addButton(10, 115, 100, 25, "Poligono");
-
-   panel->addButton(panel_w - 50, 115, 40, 25, "del");
-   panel->addButton(panel_w - 50, 80, 40, 25, " +");
-   panel->addButton(panel_w - 50, 45, 40, 25, " -");
-   panels.push_front(panel);
+   create_panel();
 
    mouse_state = new Mouse();
 

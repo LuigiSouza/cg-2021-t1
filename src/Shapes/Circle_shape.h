@@ -48,6 +48,13 @@ public:
          update_base[i].set(update_x[i] - update_x[0], update_y[i] - update_y[0]);
       }
    }
+
+   ~Circle_shape()
+   {
+      delete vx;
+      delete vy;
+      delete draw;
+   }
 };
 
 #endif

@@ -51,7 +51,7 @@
 		<Unit filename="src/Imagem.h" />
 		<Unit filename="src/Panel/Botao.h" />
 		<Unit filename="src/Panel/Panel.h" />
-		<Unit filename="src/Shapes/Botao.h" />
+		<Unit filename="src/Shapes/Circle_shape.h" />
 		<Unit filename="src/Shapes/Polygon_shape.h" />
 		<Unit filename="src/Shapes/Shape.h" />
 		<Unit filename="src/Shapes/Square_shape.h" />

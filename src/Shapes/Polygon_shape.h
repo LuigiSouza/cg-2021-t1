@@ -59,6 +59,13 @@ public:
          update_base[i].set(update_x[i] - base_x, update_y[i] - base_y);
       }
    }
+
+   ~Polygon_shape()
+   {
+      delete vx;
+      delete vy;
+      delete draw;
+   }
 };
 
 #endif

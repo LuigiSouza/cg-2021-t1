@@ -184,6 +184,7 @@ public:
          updateShape = true;
          return true;
       }
+      updateShape = false;
       return false;
    }
 
@@ -224,6 +225,13 @@ public:
          CV::circleFill(update_x[i], update_y[i], RADIUS_BALL, 10);
       }
       CV::circleFill(midle_x, this->up_y, RADIUS_BALL, 10);
+   }
+
+   ~Shape()
+   {
+      delete vx;
+      delete vy;
+      delete draw;
    }
 
 protected:

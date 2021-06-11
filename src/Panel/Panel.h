@@ -2,6 +2,7 @@
 #define __PANEL_H__
 
 #include "../Handles/Vector2.h"
+#include "../Handles/HandleMouse.h"
 #include "Botao.h"
 
 #include "../gl_canvas2d.h"
@@ -18,11 +19,27 @@ private:
 
    std::list<Botao *> buttons;
 
+   int color_control;
+
    float r, g, b;
 
 public:
    Panel(float x, float y, float width, float height);
    ~Panel();
+
+   Botao *isInside(Mouse mouse)
+   {
+      Botao *ret;
+      for (auto it = buttons.begin(); it != buttons.end(); ++it)
+      {
+         if ((*it)->Colidiu(mouse))
+         {
+            ret = (*it);
+            return ret;
+         }
+      }
+      return nullptr;
+   }
 
    void color(float r, float g, float b)
    {
@@ -31,18 +48,11 @@ public:
       this->b = b;
    }
 
-   void addButton(float _x, float _y, float _larg, float _alt, std::string _label)
+   void addButton(float _x, float _y, float _larg, float _alt, int function)
    {
       _x += coord_x;
       _y += coord_y;
-      buttons.push_front(new Botao(_x, _y, _larg, _alt, _label));
-   }
-
-   void addButton(float _x, float _y, float _larg, float _alt, float *vx, float *vy, int elems)
-   {
-      _x += coord_x;
-      _y += coord_y;
-      buttons.push_front(new Botao(_x, _y, _larg, _alt, vx, vy, elems));
+      buttons.push_front(new Botao(_x, _y, _larg, _alt, function, &color_control));
    }
 
    void render()
@@ -64,6 +74,7 @@ Panel::Panel(float x, float y, float width, float height)
    coord_y = y;
    this->width = width;
    this->height = height;
+   color_control = 0;
    r = g = b = 1;
 }
 
