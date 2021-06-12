@@ -66,7 +66,7 @@ public:
       delete vx;
       delete vy;
       delete draw;
-   }
+   }  
 };
 
 #endif

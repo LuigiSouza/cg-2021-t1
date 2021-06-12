@@ -5,11 +5,12 @@
 #define RADIUS_BALL 5
 
 #include "../gl_canvas2d.h"
-#include "../Handles/Point.h"
+#include "../Handles/Point.hpp"
 #include "../Handles/Vector2.h"
 class Figure
 {
 private:
+   // Rotate Figure with mouse
    virtual void rotate_figure(Mouse mouse)
    {
       float base_x = update_x[0];
@@ -145,89 +146,6 @@ private:
    }
 
 public:
-   virtual void render(void)
-   {
-      CV::color(this->r, this->g, this->b);
-      if (fill_flag)
-         CV::polygonFill(vx, vy, elems);
-      else
-         CV::polygon(vx, vy, elems);
-      CV::color(1, 1, 1);
-   }
-
-   virtual void update(Mouse mouse)
-   {
-      if (updateFigure)
-      {
-         update_figure(mouse);
-      }
-      else
-      {
-         move_figure(mouse);
-      }
-   }
-
-   // Checks if mouse is inside of a resize option
-   bool checkUpdateFigure(Mouse mouse)
-   {
-      for (int i = 0; i < 4; i++)
-      {
-         if (Point::distance(mouse.getX(), mouse.getY(), update_x[i], update_y[i]) < RADIUS_BALL)
-         {
-            resize_pos = i;
-            updateFigure = true;
-            return true;
-         }
-      }
-      if (Point::distance(mouse.getX(), mouse.getY(), midle_x, up_y) < RADIUS_BALL)
-      {
-         resize_pos = -1;
-         updateFigure = true;
-         return true;
-      }
-      updateFigure = false;
-      return false;
-   }
-
-   void releaseMouse(void)
-   {
-      updateFigure = false;
-   }
-
-   // Change fill of figure
-   virtual void fill(void)
-   {
-      this->fill_flag = !this->fill_flag;
-   }
-
-   // Checks if mouse is inside of figure
-   virtual bool isInside(Mouse mouse)
-   {
-      return Point::isInside(mouse.getX(), mouse.getY(), elems, vx, vy);
-   }
-
-   // Change Color
-   void color(float r, float g, float b)
-   {
-      this->r = r;
-      this->g = g;
-      this->b = b;
-   }
-
-   // Highlight the selected figure
-   virtual void high_light()
-   {
-      CV::color(0.5f + (1 + cos(this->gold)) / 4, 0.5f + (1 + cos(this->gold)) / 4, 0);
-      this->gold += 0.05;
-      CV::polygon(update_x, update_y, 4);
-      CV::color(1, 1, 1);
-      for (int i = 0; i < 4; i++)
-      {
-         CV::circleFill(update_x[i], update_y[i], RADIUS_BALL, 10);
-      }
-      CV::circleFill(midle_x, this->up_y, RADIUS_BALL, 10);
-   }
-
    void rotate_angle(float angle)
    {
       angle = angle * (PI / 180.0);
@@ -270,6 +188,7 @@ public:
 
       this->angle = angle;
    }
+
    void resize_proportion(Vector2 proportion)
    {
       float base_x = update_x[0];
@@ -298,24 +217,108 @@ public:
       this->proportion.set(proportion);
    }
 
-   int getType() { return this->type; };
+   virtual void render(void)
+   {
+      CV::color(this->r, this->g, this->b);
+      if (fill_flag)
+         CV::polygonFill(vx, vy, elems);
+      else
+         CV::polygon(vx, vy, elems);
+      CV::color(1, 1, 1);
+   }
 
-   float getAngle() { return this->angle; };
+   virtual void update(Mouse mouse)
+   {
+      if (updateFigure)
+      {
+         update_figure(mouse);
+      }
+      else
+      {
+         move_figure(mouse);
+      }
+   }
 
-   float getWidth() { return this->width_box; };
-   float getHeight() { return this->height_box; };
+   // Checks if mouse is inside of figure
+   virtual bool isInside(Mouse mouse)
+   {
+      return Point::isInside(mouse.getX(), mouse.getY(), elems, vx, vy);
+   }
 
-   float getX() { return this->update_x[0]; };
-   float getY() { return this->update_y[0]; };
+   // Checks if mouse is inside of a resize option
+   bool checkUpdateFigure(Mouse mouse)
+   {
+      for (int i = 0; i < 4; i++)
+      {
+         if (Point::distance(mouse.getX(), mouse.getY(), update_x[i], update_y[i]) < RADIUS_BALL)
+         {
+            resize_pos = i;
+            updateFigure = true;
+            return true;
+         }
+      }
+      if (Point::distance(mouse.getX(), mouse.getY(), midle_x, up_y) < RADIUS_BALL)
+      {
+         resize_pos = -1;
+         updateFigure = true;
+         return true;
+      }
+      updateFigure = false;
+      return false;
+   }
+
+   void releaseMouse(void)
+   {
+      updateFigure = false;
+   }
+
+   // Change Color
+   void color(float r, float g, float b)
+   {
+      this->r = r;
+      this->g = g;
+      this->b = b;
+   }
+
+   // Change fill of figure
+   virtual void fill(void)
+   {
+      this->fill_flag = !this->fill_flag;
+   }
+
+   // Highlight the selected figure
+   virtual void high_light()
+   {
+      CV::color(0.5f + (1 + cos(this->gold)) / 4, 0.5f + (1 + cos(this->gold)) / 4, 0);
+      this->gold += 0.05;
+      CV::polygon(update_x, update_y, 4);
+      CV::color(1, 1, 1);
+      for (int i = 0; i < 4; i++)
+      {
+         CV::circleFill(update_x[i], update_y[i], RADIUS_BALL, 10);
+      }
+      CV::circleFill(midle_x, this->up_y, RADIUS_BALL, 10);
+   }
+
+   // getters
+   int getType() { return this->type; }
 
    int getElems() { return this->elems; }
 
-   Vector2 getBaseXY(int i)
+   float getAngle() { return this->angle; }
+
+   float getWidth() { return this->width_box; }
+   float getHeight() { return this->height_box; }
+
+   float getX() { return this->update_x[0]; }
+   float getY() { return this->update_y[0]; }
+
+   Vector2 getIndexXY(int i)
    {
       return Vector2(draw[i].x, draw[i].y);
    }
 
-   Vector2 getProportion() { return this->proportion; };
+   Vector2 getProportion() { return this->proportion; }
 
    float *getRGB()
    {

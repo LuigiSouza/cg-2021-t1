@@ -25,12 +25,9 @@
 
 #include "gl_canvas2d.h"
 
-#include "Bmp.h"
-#include "Imagem.h"
+#include "Handles/HandleMouse.hpp"
 
-#include "Handles/HandleMouse.h"
-
-#include "Panel/Panel.h"
+#include "Panel/Panel.hpp"
 
 #include "Figures/Polygon_figure.h"
 #include "Figures/Square_figure.h"
@@ -231,7 +228,7 @@ void save_file()
          fprintf(fp, "%.f %.f ", (*it)->getX(), (*it)->getY());
          for (int i = 0; i < elems; i++)
          {
-            polygon.set((*it)->getBaseXY(i));
+            polygon.set((*it)->getIndexXY(i));
             fprintf(fp, "%.f %.f ", polygon.x, polygon.y);
          }
          break;
@@ -300,7 +297,7 @@ bool check_panel()
       newPolygon.clear();
    }
 
-   Botao *button = panel->isInside(*mouse_state);
+   Botao *button = panel->buttonClicked(*mouse_state);
 
    if (button == nullptr)
    {
@@ -328,6 +325,13 @@ bool check_panel()
          {
             if ((*it) == Choose)
             {
+               if (mouse_state->getCtrl())
+               {
+                  figures.remove(Choose);
+                  figures.push_front(Choose);
+                  break;
+               }
+
                figures.remove(Choose);
                figures.emplace(--it, Choose);
                break;
@@ -342,6 +346,13 @@ bool check_panel()
          {
             if ((*it) == Choose)
             {
+               if (mouse_state->getCtrl())
+               {
+                  figures.remove(Choose);
+                  figures.push_back(Choose);
+                  break;
+               }
+
                auto aux = ++it;
                figures.remove(Choose);
                figures.emplace(++aux, Choose);

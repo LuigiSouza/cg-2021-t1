@@ -2,6 +2,7 @@
 #define __VECTOR_2_H__
 
 
+
 class Vector2
 {
 public:

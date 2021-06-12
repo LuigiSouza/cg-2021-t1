@@ -1,32 +1,10 @@
 
-#include "HandleMouse.h"
+#include "HandleMouse.hpp"
 
 Mouse::Mouse(void)
 {
-   for (int i = 0; i < 3; i++)
-   {
-      prev_button[i] = false;
-      button[i] = false;
-   }
-}
-
-void Mouse::update(int index)
-{
-   Mouse::prev_button[index] = Mouse::button[index];
-   Mouse::button[index] = !Mouse::button[index];
-}
-
-bool Mouse::isDown(int index)
-{
-   return Mouse::button[index];
-}
-
-bool Mouse::clicked(int index)
-{
-   bool ret = !Mouse::button[index] && Mouse::prev_button[index];
-   if (ret)
-      Mouse::prev_button[index] = Mouse::button[index];
-   return ret;
+   this->prev_pos_x = this->pos_x = 0;
+   this->prev_pos_y = this->pos_y = 0;
 }
 
 void Mouse::setX(float x)
