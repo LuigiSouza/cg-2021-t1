@@ -13,10 +13,13 @@ public:
       vx = new float[div];
       vy = new float[div];
 
+      type = CIRCULO;
+      proportion.set(1, 1);
+
       draw = new Vector2[div]();
 
-      width_box = 2 * radius;
-      height_box = 2 * radius;
+      width_box = 2.0 * radius;
+      height_box = 2.0 * radius;
       elems = div;
 
       midle_x = x;
@@ -35,7 +38,7 @@ public:
       update_x[1] = x + radius;
       update_y[1] = y - radius;
       update_x[2] = x + radius;
-      update_y[2] = x + radius;
+      update_y[2] = y + radius;
       update_x[3] = x - radius;
       update_y[3] = y + radius;
 

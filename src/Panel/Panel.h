@@ -27,6 +27,12 @@ public:
    Panel(float x, float y, float width, float height);
    ~Panel();
 
+   bool insidePanel(Mouse mouse)
+   {
+      return (mouse.getX() >= coord_x && mouse.getX() <= coord_x + width &&
+              mouse.getY() >= coord_y && mouse.getY() <= coord_y + height);
+   }
+
    Botao *isInside(Mouse mouse)
    {
       Botao *ret;

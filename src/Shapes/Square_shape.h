@@ -17,6 +17,9 @@ public:
       vx = new float[4];
       vy = new float[4];
 
+      type = QUADRADO;
+      proportion.set(1, 1);
+
       draw = new Vector2[4]();
 
       width_box = width;

@@ -14,6 +14,9 @@ public:
 
       draw = new Vector2[3]();
 
+      type = TRIANGULO;
+      proportion.set(1, 1);
+
       this->elems = 3;
 
       vx[0] = x1;

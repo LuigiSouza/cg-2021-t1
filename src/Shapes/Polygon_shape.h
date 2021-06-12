@@ -17,6 +17,9 @@ public:
       vx = new float[elems];
       vy = new float[elems];
 
+      type = POLIGONO;
+      proportion.set(1, 1);
+
       draw = new Vector2[elems]();
 
       float minx = 100000;

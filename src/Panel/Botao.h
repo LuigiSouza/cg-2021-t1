@@ -98,15 +98,15 @@ class Botao
 
       elems = 5;
 
-      vx[0] = x + 11;
+      vx[0] = x + 12;
       vy[0] = y + 10;
-      vx[1] = x + 19;
+      vx[1] = x + 18;
       vy[1] = y + 10;
-      vx[2] = x + 22;
+      vx[2] = x + 21;
       vy[2] = y + 15;
       vx[3] = x + 15;
       vy[3] = y + 20;
-      vx[4] = x + 8;
+      vx[4] = x + 9;
       vy[4] = y + 15;
 
       break;

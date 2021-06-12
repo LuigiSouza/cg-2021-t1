@@ -3,7 +3,6 @@
 #define __SHAPE_H__
 
 #define RADIUS_BALL 5
-#define MIN_EDGE 5
 
 #include "../gl_canvas2d.h"
 #include "../Handles/Point.h"
@@ -26,7 +25,7 @@ private:
       midle_x = rotate.x + base_x;
       up_y = rotate.y + base_y;
 
-      // Translate shpae points
+      // Translate shape points
       for (int i = 0; i < elems; i++)
       {
          rotate = Point::rotate(vx[i] - base_x,
@@ -52,6 +51,7 @@ private:
       }
 
       this->angle += angle;
+      std::cout << this->angle << std::endl;
    }
 
    virtual void resize_shape(Mouse mouse)
@@ -113,6 +113,8 @@ private:
       float up_or_down_y = proportion.y < 0 ? -10 : 10;
       midle_x = ((update_x[2] + update_x[3]) / 2) + sin(angle) * up_or_down_x * -1.0;
       up_y = ((update_y[2] + update_y[3]) / 2) + cos(angle) * up_or_down_y * 1.0;
+
+      this->proportion.set(proportion);
    }
 
    virtual void update_shape(Mouse mouse)
@@ -227,7 +229,35 @@ public:
       CV::circleFill(midle_x, this->up_y, RADIUS_BALL, 10);
    }
 
-   ~Shape()
+   int getType() { return this->type; };
+
+   float getAngle() { return this->angle; };
+
+   float getWidth() { return this->width_box; };
+   float getHeight() { return this->height_box; };
+
+   float getX() { return this->update_x[0]; };
+   float getY() { return this->update_y[0]; };
+
+   int getElems() { return this->elems; }
+
+   Vector2 getBaseXY(int i)
+   {
+      return Vector2(draw[i].x, draw[i].y);
+   }
+
+   Vector2 getProportion() { return this->proportion; };
+
+   float *getRGB()
+   {
+      float *rgb = new float[3];
+      rgb[0] = r;
+      rgb[1] = g;
+      rgb[2] = b;
+      return rgb;
+   }
+
+   virtual ~Shape()
    {
       delete vx;
       delete vy;
@@ -262,6 +292,10 @@ protected:
    bool fill_flag = true;
    float r = 1, g = 1, b = 1;
    float gold = 0.2;
+
+   // Stores type and proportion of object to save into file
+   int type;
+   Vector2 proportion;
 
    // Coords and flag of option selected
    bool updateShape = false;

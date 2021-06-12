@@ -39,17 +39,91 @@
 int screenWidth = 800, screenHeight = 680;
 Mouse *mouse_state;
 
+// Variables to track chosen shapes
 Shape *Drag;
 Shape *Choose;
 
+// Variable to track new shape
+int New_Shape;
+
+// Variable to keep chosen shape when clicking a panel option
 bool click = false;
 
-float r = 0.23;
+// Variable to keep track of new polygons
+std::list<Vector2> newPolygon;
 
-int fps = 0;
-
+// List of shapes and
+Panel *panel;
 std::list<Shape *> shapes;
-std::list<Panel *> panels;
+
+void save_program()
+{
+   FILE *fp;
+   if ((fp = fopen("out.gr", "w")) == NULL)
+   {
+      printf("Erro na abertura do arquivo.");
+      return;
+   }
+   else
+      printf("Arquivo aberto com sucesso.");
+
+   int n = shapes.size();
+   fprintf(fp, "%d\n", n);
+
+   for (auto it = shapes.begin(); it != shapes.end(); ++it)
+   {
+      int n = (*it)->getType();
+      float ang = (*it)->getAngle() * (180.0 / PI); // convert to angle
+
+      Vector2 proportion = (*it)->getProportion();
+      Vector2 polygon;
+      float *rgb = (*it)->getRGB();
+
+      int elems;
+
+      fprintf(fp, "%d ", n);
+      switch (n)
+      {
+      case QUADRADO:
+         fprintf(fp, "%.f %.f %.f %.f ",
+                 (*it)->getX(),
+                 (*it)->getY(),
+                 (*it)->getWidth(),
+                 (*it)->getHeight());
+         break;
+      case TRIANGULO:
+         fprintf(fp, "%.f %.f %.f %.f ",
+                 (*it)->getX(),
+                 (*it)->getY(),
+                 (*it)->getWidth(),
+                 (*it)->getHeight());
+         break;
+      case CIRCULO:
+         fprintf(fp, "%.f %.f %.f ",
+                 ((*it)->getX() + (*it)->getWidth()) / 2.0,
+                 ((*it)->getY() + (*it)->getWidth()) / 2.0,
+                 (*it)->getWidth() / 2.0);
+         break;
+      case POLIGONO:
+         elems = (*it)->getElems();
+         fprintf(fp, "%d ", elems);
+         for (int i = 0; i < elems; i++)
+         {
+            polygon.set((*it)->getBaseXY(i));
+            fprintf(fp, "%.f %.f ", polygon.x, polygon.y);
+         }
+         break;
+      default:
+         break;
+      }
+      fprintf(fp, "%f %f %f %.2f %.2f %.2f\n",
+              ang, proportion.x, proportion.y,
+              rgb[0], rgb[1], rgb[2]);
+      delete rgb;
+   }
+
+   fclose(fp);
+}
 
 void create_panel()
 {
@@ -59,7 +133,7 @@ void create_panel()
    float panel_x = screenHeight / 3 - offset;
    float panel_y = screenHeight - panel_h - offset;
 
-   Panel *panel = new Panel(panel_x, panel_y, panel_w, panel_h);
+   panel = new Panel(panel_x, panel_y, panel_w, panel_h);
 
    panel->addButton(offset, 115, 30, 30, QUADRADO);
    panel->addButton(offset, 80, 30, 30, TRIANGULO);
@@ -75,8 +149,6 @@ void create_panel()
    {
       panel->addButton(((int)i / 4) * 40 + (panel_w / 4), ((i % 4) * 35) + 10, 40, 30, COR);
    }
-
-   panels.push_front(panel);
 }
 
 void update()
@@ -104,20 +176,43 @@ void render()
       Choose->high_light();
    }
 
-   for (auto it = panels.begin(); it != panels.end(); ++it)
+   panel->render();
+
+   if (newPolygon.size() > 0)
    {
-      (*it)->render();
+      float vx[newPolygon.size()];
+      float vy[newPolygon.size()];
+      int i = 0;
+      for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it, i++)
+      {
+         vx[i] = (*it).x;
+         vy[i] = (*it).y;
+      }
+      CV::color(0, 1, 0);
+      CV::polygonFill(vx, vy, newPolygon.size());
+      CV::color(1, 1, 1);
+      for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it)
+         CV::circleFill((*it).x, (*it).y, 5, 10);
+   }
+
+   if (New_Shape != -1)
+   {
+      CV::color(0, 1, 0);
+      CV::circleFill(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
+      CV::color(0, 0, 0);
+      CV::circle(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
    }
 }
 
 //funcao chamada toda vez que uma tecla for pressionada
 void keyboard(int key)
 {
-   printf("\nTecla: %d", key);
+   // printf("\nTecla: %d", key);
 
    switch (key)
    {
    case 27: //finaliza programa
+      save_program();
       exit(0);
       break;
    case 214:
@@ -128,7 +223,7 @@ void keyboard(int key)
 //funcao chamada toda vez que uma tecla for liberada
 void keyboardUp(int key)
 {
-   printf("\nLiberou tecla: %d", key);
+   // printf("\nLiberou tecla: %d", key);
 
    switch (key)
    {
@@ -138,76 +233,148 @@ void keyboardUp(int key)
    }
 }
 
-void check_panel()
+bool add_shape(int *shape)
 {
-   for (auto it = panels.begin(); it != panels.end(); ++it)
+   Shape *shp;
+   double height;
+   switch (*shape)
    {
-      Botao *ret = (*it)->isInside(*mouse_state);
-
-      if (ret == nullptr)
-         continue;
-
-      switch (ret->get_function())
+   case -1:
+      return false;
+   case QUADRADO:
+      shp = new Square_shape(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, 100);
+      break;
+   case TRIANGULO:
+      height = 86.0254037844386; // height of an equilateral triangle
+      shp = new Triangle_shape(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, height);
+      break;
+   case CIRCULO:
+      shp = new Circle_shape(mouse_state->getX(), mouse_state->getY(), 50, 30);
+      break;
+   case POLIGONO:
+      if (newPolygon.size() > 0 &&
+          Point::distance(
+              newPolygon.front().x,
+              newPolygon.front().y,
+              mouse_state->getX(),
+              mouse_state->getY()) <= RADIUS_BALL)
       {
-      case ELEVAR:
-         if (Choose)
+         int n = newPolygon.size();
+         float vx[n];
+         float vy[n];
+         int i = 0;
+         for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it, i++)
          {
-            for (auto it = ++shapes.begin(); it != shapes.end(); ++it)
-            {
-               if ((*it) == Choose)
-               {
-                  shapes.remove(Choose);
-                  shapes.emplace(--it, Choose);
-                  break;
-               }
-            }
+            vx[i] = (*it).x;
+            vy[i] = (*it).y;
          }
-         break;
-      case ABAIXAR:
-         if (Choose)
-         {
-            for (auto it = shapes.begin(); it != --shapes.end(); ++it)
-            {
-               if ((*it) == Choose)
-               {
-                  auto aux = ++it;
-                  shapes.remove(Choose);
-                  shapes.emplace(++aux, Choose);
-                  break;
-               }
-            }
-         }
-         break;
-      case PREENCHER:
-         if (Choose)
-         {
-            Choose->fill();
-         }
-         break;
-      case DELETAR:
-         if (Choose)
-         {
-            Drag = nullptr;
-            shapes.remove(Choose);
-            delete Choose;
-            Choose = nullptr;
-         }
-      case COR:
-         if (Choose)
-         {
-            float *rgb = ret->get_rgb();
-            Choose->color(rgb[0], rgb[1], rgb[2]);
-            delete rgb;
-         }
-         break;
-      
-      default:
-         std::cout << "Funcao Desconhecida..." << std::endl;
-         exit(1);
+         newPolygon.clear();
+         shp = new Polygon_shape(vx, vy, n);
          break;
       }
-      click = true;
+      newPolygon.push_back(Vector2(mouse_state->getX(), mouse_state->getY()));
+      return true;
+   default:
+      std::cout << "Figura Inválida..." << std::endl;
+      exit(1);
+      break;
    }
+   shp->color(0, 1, 0);
+   shapes.push_front(shp);
+   Choose = shp;
+
+   *shape = -1;
+   click = true;
+   return true;
+}
+
+bool check_panel()
+{
+   if (panel->insidePanel(*mouse_state))
+   {
+      New_Shape = -1;
+   }
+
+   Botao *ret = panel->isInside(*mouse_state);
+
+   if (ret == nullptr)
+   {
+      return false;
+   }
+
+   switch (ret->get_function())
+   {
+   case QUADRADO:
+      New_Shape = QUADRADO;
+      break;
+   case TRIANGULO:
+      New_Shape = TRIANGULO;
+      break;
+   case CIRCULO:
+      New_Shape = CIRCULO;
+      break;
+   case POLIGONO:
+      New_Shape = POLIGONO;
+      break;
+   case ELEVAR:
+      if (Choose)
+      {
+         for (auto it = ++shapes.begin(); it != shapes.end(); ++it)
+         {
+            if ((*it) == Choose)
+            {
+               shapes.remove(Choose);
+               shapes.emplace(--it, Choose);
+               break;
+            }
+         }
+      }
+      break;
+   case ABAIXAR:
+      if (Choose)
+      {
+         for (auto it = shapes.begin(); it != --shapes.end(); ++it)
+         {
+            if ((*it) == Choose)
+            {
+               auto aux = ++it;
+               shapes.remove(Choose);
+               shapes.emplace(++aux, Choose);
+               break;
+            }
+         }
+      }
+      break;
+   case DELETAR:
+      if (Choose)
+      {
+         Drag = nullptr;
+         shapes.remove(Choose);
+         delete Choose;
+         Choose = nullptr;
+      }
+      break;
+   case PREENCHER:
+      if (Choose)
+      {
+         Choose->fill();
+      }
+      break;
+   case COR:
+      if (Choose)
+      {
+         float *rgb = ret->get_rgb();
+         Choose->color(rgb[0], rgb[1], rgb[2]);
+         delete rgb;
+      }
+      break;
+   default:
+      std::cout << "Funcao Desconhecida..." << std::endl;
+      exit(1);
+      break;
+   }
+   click = true;
+   return true;
 }
 
 //funcao para tratamento de mouse: cliques, movimentos e arrastos
@@ -233,7 +400,15 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
       }
       else if (state == 0)
       {
-         check_panel();
+         if (check_panel())
+         {
+            return;
+         }
+
+         if (add_shape(&New_Shape))
+         {
+            return;
+         }
 
          if (Choose && Choose->checkUpdateShape(*mouse_state))
          {
@@ -257,15 +432,7 @@ int main(void)
 {
    CV::init(&screenWidth, &screenHeight, "Teste trabalho 1");
 
-   Square_shape *sq1 = new Square_shape(200, 200, 100, 100);
-   Circle_shape *sq2 = new Circle_shape(100, 100, 50, 30);
-   Triangle_shape *sq5 = new Triangle_shape(300, 300, 100, 100);
-   sq1->color(1, 0, 0);
-   sq2->color(0, 0, 1);
-   sq5->color(1, 1, 0);
-   shapes.push_front(sq1);
-   shapes.push_front(sq2);
-   shapes.push_front(sq5);
+   New_Shape = -1;
 
    create_panel();
 
