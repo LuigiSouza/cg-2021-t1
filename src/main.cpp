@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <list>
 #include <iostream>
+#include <fstream>
 
 #include "gl_canvas2d.h"
 
@@ -39,24 +40,147 @@
 int screenWidth = 800, screenHeight = 680;
 Mouse *mouse_state;
 
+// Variable to keep chosen shape when clicking a panel option
+bool click = false;
+
 // Variables to track chosen shapes
 Shape *Drag;
 Shape *Choose;
 
 // Variable to track new shape
 int New_Shape;
-
-// Variable to keep chosen shape when clicking a panel option
-bool click = false;
-
-// Variable to keep track of new polygons
 std::list<Vector2> newPolygon;
 
-// List of shapes and
 Panel *panel;
 std::list<Shape *> shapes;
 
-void save_program()
+/***********************************************************
+*
+* Render Functions
+*
+************************************************************/
+
+void render_cursor_polygon()
+{
+   if (New_Shape != -1)
+   {
+      CV::color(0, 1, 0);
+      CV::circleFill(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
+      CV::color(0, 0, 0);
+      CV::circle(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
+   }
+
+   if (newPolygon.size() > 0)
+   {
+      float vx[newPolygon.size()];
+      float vy[newPolygon.size()];
+      int i = 0;
+      for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it, i++)
+      {
+         vx[i] = (*it).x;
+         vy[i] = (*it).y;
+      }
+      CV::color(0, 1, 0);
+      CV::polygonFill(vx, vy, newPolygon.size());
+      CV::color(1, 1, 1);
+      for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it)
+         CV::circleFill((*it).x, (*it).y, 5, 10);
+   }
+}
+
+void render_shapes()
+{
+   for (auto it = shapes.rbegin(); it != shapes.rend(); ++it)
+      (*it)->render();
+}
+
+void high_light()
+{
+   if (Choose)
+      Choose->high_light();
+}
+
+/***********************************************************
+*
+* Load/Create Functions
+*
+************************************************************/
+
+void load_file()
+{
+   std::ifstream infile("out.gr");
+
+   int n;
+   infile >> n;
+
+   Shape *shp;
+
+   for (int i = 0; i < n; i++)
+   {
+      int type;
+      infile >> type;
+
+      // Loads each type of shape
+      if (type == QUADRADO)
+      {
+         float x, y, width, height;
+         infile >> x >> y >> width >> height;
+         shp = new Square_shape(x, y, width, height);
+      }
+      else if (type == TRIANGULO)
+      {
+         float x, y, width, height;
+         infile >> x >> y >> width >> height;
+         shp = new Triangle_shape(x, y, width, height);
+      }
+      else if (type == CIRCULO)
+      {
+         float x, y, radius;
+         infile >> x >> y >> radius;
+         shp = new Circle_shape(x, y, radius, 30);
+      }
+      else if (type == POLIGONO)
+      {
+         int elems;
+         float base_x, base_y;
+         infile >> elems >> base_x >> base_y;
+
+         float vx[elems], vy[elems];
+
+         for (int i = 0; i < elems; i++)
+         {
+            infile >> vx[i] >> vy[i];
+            vx[i] += base_x;
+            vy[i] += base_y;
+         }
+
+         shp = new Polygon_shape(vx, vy, elems);
+      }
+      else
+      {
+         std::cout << "Tipo inválido..." << std::endl;
+         exit(1);
+      }
+      float x, y, angle;
+      infile >> angle >> x >> y;
+      Vector2 propo(x, y);
+
+      // Resizes and rotates
+      shp->resize_proportion(propo);
+      shp->rotate_angle(angle);
+
+      float r, g, b;
+      infile >> r >> g >> b;
+      shp->color(r, g, b);
+
+      shapes.push_back(shp);
+   };
+   ./
+
+       infile.close();
+}
+
+void save_file()
 {
    FILE *fp;
    if ((fp = fopen("out.gr", "w")) == NULL)
@@ -73,12 +197,9 @@ void save_program()
    for (auto it = shapes.begin(); it != shapes.end(); ++it)
    {
       int n = (*it)->getType();
-      float ang = (*it)->getAngle() * (180.0 / PI); // convert to angle
+      float ang = (*it)->getAngle() * (180.0 / PI); // convert radian to angle
 
-      Vector2 proportion = (*it)->getProportion();
       Vector2 polygon;
-      float *rgb = (*it)->getRGB();
-
       int elems;
 
       fprintf(fp, "%d ", n);
@@ -100,13 +221,14 @@ void save_program()
          break;
       case CIRCULO:
          fprintf(fp, "%.f %.f %.f ",
-                 ((*it)->getX() + (*it)->getWidth()) / 2.0,
-                 ((*it)->getY() + (*it)->getWidth()) / 2.0,
+                 (*it)->getX() + (*it)->getWidth() / 2.0,
+                 (*it)->getY() + (*it)->getWidth() / 2.0,
                  (*it)->getWidth() / 2.0);
          break;
       case POLIGONO:
          elems = (*it)->getElems();
          fprintf(fp, "%d ", elems);
+         fprintf(fp, "%.f %.f ", (*it)->getX(), (*it)->getY());
          for (int i = 0; i < elems; i++)
          {
             polygon.set((*it)->getBaseXY(i));
@@ -114,8 +236,13 @@ void save_program()
          }
          break;
       default:
+         std::cout << "Tipo inválido..." << std::endl;
+         exit(1);
          break;
       }
+      Vector2 proportion = (*it)->getProportion();
+      float *rgb = (*it)->getRGB();
+
       fprintf(fp, "%f %f %f %.2f %.2f %.2f\n",
               ang, proportion.x, proportion.y,
               rgb[0], rgb[1], rgb[2]);
@@ -151,85 +278,17 @@ void create_panel()
    }
 }
 
+/***********************************************************
+*
+* Update Functions
+*
+************************************************************/
+
 void update()
 {
    if (Drag)
    {
       Drag->update(*mouse_state);
-   }
-}
-
-//funcao chamada continuamente. Deve-se controlar o que desenhar por meio de variaveis
-//globais que podem ser setadas pelo metodo keyboard()
-void render()
-{
-   CV::clear(0, 0, 0);
-   CV::color(1, 1, 1);
-
-   for (auto it = shapes.rbegin(); it != shapes.rend(); ++it)
-   {
-      (*it)->render();
-   }
-
-   if (Choose)
-   {
-      Choose->high_light();
-   }
-
-   panel->render();
-
-   if (newPolygon.size() > 0)
-   {
-      float vx[newPolygon.size()];
-      float vy[newPolygon.size()];
-      int i = 0;
-      for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it, i++)
-      {
-         vx[i] = (*it).x;
-         vy[i] = (*it).y;
-      }
-      CV::color(0, 1, 0);
-      CV::polygonFill(vx, vy, newPolygon.size());
-      CV::color(1, 1, 1);
-      for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it)
-         CV::circleFill((*it).x, (*it).y, 5, 10);
-   }
-
-   if (New_Shape != -1)
-   {
-      CV::color(0, 1, 0);
-      CV::circleFill(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
-      CV::color(0, 0, 0);
-      CV::circle(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
-   }
-}
-
-//funcao chamada toda vez que uma tecla for pressionada
-void keyboard(int key)
-{
-   // printf("\nTecla: %d", key);
-
-   switch (key)
-   {
-   case 27: //finaliza programa
-      save_program();
-      exit(0);
-      break;
-   case 214:
-      mouse_state->setCtrl(true);
-      break;
-   }
-}
-//funcao chamada toda vez que uma tecla for liberada
-void keyboardUp(int key)
-{
-   // printf("\nLiberou tecla: %d", key);
-
-   switch (key)
-   {
-   case 214:
-      mouse_state->setCtrl(false);
-      break;
    }
 }
 
@@ -377,6 +436,54 @@ bool check_panel()
    return true;
 }
 
+/***********************************************************
+*
+* Canvas Functions
+*
+************************************************************/
+
+//funcao chamada continuamente. Deve-se controlar o que desenhar por meio de variaveis
+//globais que podem ser setadas pelo metodo keyboard()
+void render()
+{
+   CV::clear(0, 0, 0);
+
+   render_shapes();
+
+   panel->render();
+
+   high_light();
+
+   render_cursor_polygon();
+}
+
+//funcao chamada toda vez que uma tecla for pressionada
+void keyboard(int key)
+{
+   // printf("\nTecla: %d", key);
+   switch (key)
+   {
+   case 27: //finaliza programa
+      save_file();
+      exit(0);
+      break;
+   case 214:
+      mouse_state->setCtrl(true);
+      break;
+   }
+}
+//funcao chamada toda vez que uma tecla for liberada
+void keyboardUp(int key)
+{
+   // printf("\nLiberou tecla: %d", key);
+   switch (key)
+   {
+   case 214:
+      mouse_state->setCtrl(false);
+      break;
+   }
+}
+
 //funcao para tratamento de mouse: cliques, movimentos e arrastos
 void mouse(int button, int state, int wheel, int direction, int x, int y)
 {
@@ -434,9 +541,11 @@ int main(void)
 
    New_Shape = -1;
 
+   mouse_state = new Mouse();
+
    create_panel();
 
-   mouse_state = new Mouse();
+   load_file();
 
    CV::run();
 }

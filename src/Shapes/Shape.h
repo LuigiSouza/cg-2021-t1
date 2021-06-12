@@ -51,7 +51,6 @@ private:
       }
 
       this->angle += angle;
-      std::cout << this->angle << std::endl;
    }
 
    virtual void resize_shape(Mouse mouse)
@@ -227,6 +226,76 @@ public:
          CV::circleFill(update_x[i], update_y[i], RADIUS_BALL, 10);
       }
       CV::circleFill(midle_x, this->up_y, RADIUS_BALL, 10);
+   }
+
+   void rotate_angle(float angle)
+   {
+      angle = angle * (PI / 180.0);
+
+      float base_x = update_x[0];
+      float base_y = update_y[0];
+
+      float vector_x = midle_x - base_x;
+      float vector_y = up_y - base_y;
+
+      Vector2 rotate = Point::rotate(vector_x, vector_y, angle);
+
+      midle_x = rotate.x + base_x;
+      up_y = rotate.y + base_y;
+
+      // Translate shape points
+      for (int i = 0; i < elems; i++)
+      {
+         rotate = Point::rotate(vx[i] - base_x,
+                                vy[i] - base_y, angle);
+
+         vx[i] = rotate.x + base_x;
+         vy[i] = rotate.y + base_y;
+      }
+      for (int i = 0; i < 4; i++)
+      {
+         // Translate box points
+         rotate = Point::rotate(update_x[i] - base_x,
+                                update_y[i] - base_y, angle);
+
+         update_x[i] = rotate.x + base_x;
+         update_y[i] = rotate.y + base_y;
+
+         // Translate box points relato to (0, 0)
+         rotate = Point::rotate(update_base[i].x,
+                                update_base[i].y, angle);
+
+         update_base[i].set(rotate.x, rotate.y);
+      }
+
+      this->angle = angle;
+   }
+   void resize_proportion(Vector2 proportion)
+   {
+      float base_x = update_x[0];
+      float base_y = update_y[0];
+      // Update coordinates
+      for (int i = 0; i < elems; i++)
+      {
+         Vector2 relative = draw[i] * proportion;
+
+         vx[i] = relative.x + base_x;
+         vy[i] = relative.y + base_y;
+      }
+      // Update box coordinates
+      for (int i = 0; i < 4; i++)
+      {
+         Vector2 relative = update_base[i] * proportion;
+
+         update_x[i] = relative.x + base_x;
+         update_y[i] = relative.y + base_y;
+      }
+      float up_or_down_x = proportion.y < 0 ? -10 : 10;
+      float up_or_down_y = proportion.y < 0 ? -10 : 10;
+      midle_x = ((update_x[2] + update_x[3]) / 2) + sin(this->angle) * up_or_down_x * -1.0;
+      up_y = ((update_y[2] + update_y[3]) / 2) + cos(this->angle) * up_or_down_y * 1.0;
+
+      this->proportion.set(proportion);
    }
 
    int getType() { return this->type; };
