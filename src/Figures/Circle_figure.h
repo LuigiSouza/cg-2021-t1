@@ -1,14 +1,14 @@
 #ifndef __CIRCLE_H__
 #define __CIRCLE_H__
 
-#include "../gl_canvas2d.h"
+#include "Figure.h"
 
-class Circle_shape : public Shape
+class Circle_figure : public Figure
 {
 private:
    /* data */
 public:
-   Circle_shape(float x, float y, float radius, int div)
+   Circle_figure(float x, float y, float radius, int div)
    {
       vx = new float[div];
       vy = new float[div];
@@ -52,7 +52,7 @@ public:
       }
    }
 
-   ~Circle_shape()
+   ~Circle_figure()
    {
       delete vx;
       delete vy;

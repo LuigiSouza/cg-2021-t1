@@ -86,6 +86,7 @@ Panel::Panel(float x, float y, float width, float height)
 
 Panel::~Panel()
 {
+   delete buttons;
 }
 
 #endif

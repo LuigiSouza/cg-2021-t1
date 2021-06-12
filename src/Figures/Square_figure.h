@@ -1,18 +1,13 @@
 
-#ifndef __Square_shape_H__
-#define __Square_shape_H__
+#ifndef __Square_figure_H__
+#define __Square_figure_H__
 
-#include "Shape.h"
-#include "../gl_canvas2d.h"
-#include "../Handles/Point.h"
+#include "Figure.h"
 
-#include <iostream>
-#include <cmath>
-
-class Square_shape : public Shape
+class Square_figure : public Figure
 {
 public:
-   Square_shape(float x, float y, float width, float height)
+   Square_figure(float x, float y, float width, float height)
    {
       vx = new float[4];
       vy = new float[4];
@@ -45,7 +40,7 @@ public:
       }
    }
 
-   ~Square_shape()
+   ~Square_figure()
    {
       delete vx;
       delete vy;

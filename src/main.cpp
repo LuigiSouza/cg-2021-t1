@@ -32,27 +32,28 @@
 
 #include "Panel/Panel.h"
 
-#include "Shapes/Polygon_shape.h"
-#include "Shapes/Square_shape.h"
-#include "Shapes/Circle_shape.h"
-#include "Shapes/Triangle_shape.h"
+#include "Figures/Polygon_figure.h"
+#include "Figures/Square_figure.h"
+#include "Figures/Circle_figure.h"
+#include "Figures/Triangle_figure.h"
+#include "Figures/Figure.h"
 
 int screenWidth = 800, screenHeight = 680;
 Mouse *mouse_state;
 
-// Variable to keep chosen shape when clicking a panel option
+// Variable to keep chosen figure when clicking a panel option
 bool click = false;
 
-// Variables to track chosen shapes
-Shape *Drag;
-Shape *Choose;
+// Variables to track chosen figures
+Figure *Drag;
+Figure *Choose;
 
-// Variable to track new shape
-int New_Shape;
+// Variable to track new figure
+int New_Figure;
 std::list<Vector2> newPolygon;
 
 Panel *panel;
-std::list<Shape *> shapes;
+std::list<Figure *> figures;
 
 /***********************************************************
 *
@@ -62,7 +63,7 @@ std::list<Shape *> shapes;
 
 void render_cursor_polygon()
 {
-   if (New_Shape != -1)
+   if (New_Figure != -1)
    {
       CV::color(0, 1, 0);
       CV::circleFill(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
@@ -88,9 +89,9 @@ void render_cursor_polygon()
    }
 }
 
-void render_shapes()
+void render_figures()
 {
-   for (auto it = shapes.rbegin(); it != shapes.rend(); ++it)
+   for (auto it = figures.rbegin(); it != figures.rend(); ++it)
       (*it)->render();
 }
 
@@ -113,31 +114,31 @@ void load_file()
    int n;
    infile >> n;
 
-   Shape *shp;
+   Figure *shp;
 
    for (int i = 0; i < n; i++)
    {
       int type;
       infile >> type;
 
-      // Loads each type of shape
+      // Loads each type of figure
       if (type == QUADRADO)
       {
          float x, y, width, height;
          infile >> x >> y >> width >> height;
-         shp = new Square_shape(x, y, width, height);
+         shp = new Square_figure(x, y, width, height);
       }
       else if (type == TRIANGULO)
       {
          float x, y, width, height;
          infile >> x >> y >> width >> height;
-         shp = new Triangle_shape(x, y, width, height);
+         shp = new Triangle_figure(x, y, width, height);
       }
       else if (type == CIRCULO)
       {
          float x, y, radius;
          infile >> x >> y >> radius;
-         shp = new Circle_shape(x, y, radius, 30);
+         shp = new Circle_figure(x, y, radius, 30);
       }
       else if (type == POLIGONO)
       {
@@ -154,7 +155,7 @@ void load_file()
             vy[i] += base_y;
          }
 
-         shp = new Polygon_shape(vx, vy, elems);
+         shp = new Polygon_figure(vx, vy, elems);
       }
       else
       {
@@ -173,11 +174,10 @@ void load_file()
       infile >> r >> g >> b;
       shp->color(r, g, b);
 
-      shapes.push_back(shp);
-   };
-   ./
+      figures.push_back(shp);
+   }
 
-       infile.close();
+   infile.close();
 }
 
 void save_file()
@@ -191,10 +191,10 @@ void save_file()
    else
       printf("Arquivo aberto com sucesso.");
 
-   int n = shapes.size();
+   int n = figures.size();
    fprintf(fp, "%d\n", n);
 
-   for (auto it = shapes.begin(); it != shapes.end(); ++it)
+   for (auto it = figures.begin(); it != figures.end(); ++it)
    {
       int n = (*it)->getType();
       float ang = (*it)->getAngle() * (180.0 / PI); // convert radian to angle
@@ -292,98 +292,44 @@ void update()
    }
 }
 
-bool add_shape(int *shape)
-{
-   Shape *shp;
-   double height;
-   switch (*shape)
-   {
-   case -1:
-      return false;
-   case QUADRADO:
-      shp = new Square_shape(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, 100);
-      break;
-   case TRIANGULO:
-      height = 86.0254037844386; // height of an equilateral triangle
-      shp = new Triangle_shape(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, height);
-      break;
-   case CIRCULO:
-      shp = new Circle_shape(mouse_state->getX(), mouse_state->getY(), 50, 30);
-      break;
-   case POLIGONO:
-      if (newPolygon.size() > 0 &&
-          Point::distance(
-              newPolygon.front().x,
-              newPolygon.front().y,
-              mouse_state->getX(),
-              mouse_state->getY()) <= RADIUS_BALL)
-      {
-         int n = newPolygon.size();
-         float vx[n];
-         float vy[n];
-         int i = 0;
-         for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it, i++)
-         {
-            vx[i] = (*it).x;
-            vy[i] = (*it).y;
-         }
-         newPolygon.clear();
-         shp = new Polygon_shape(vx, vy, n);
-         break;
-      }
-      newPolygon.push_back(Vector2(mouse_state->getX(), mouse_state->getY()));
-      return true;
-   default:
-      std::cout << "Figura Inválida..." << std::endl;
-      exit(1);
-      break;
-   }
-   shp->color(0, 1, 0);
-   shapes.push_front(shp);
-   Choose = shp;
-
-   *shape = -1;
-   click = true;
-   return true;
-}
-
 bool check_panel()
 {
    if (panel->insidePanel(*mouse_state))
    {
-      New_Shape = -1;
+      New_Figure = -1;
+      newPolygon.clear();
    }
 
-   Botao *ret = panel->isInside(*mouse_state);
+   Botao *button = panel->isInside(*mouse_state);
 
-   if (ret == nullptr)
+   if (button == nullptr)
    {
       return false;
    }
 
-   switch (ret->get_function())
+   switch (button->get_function())
    {
    case QUADRADO:
-      New_Shape = QUADRADO;
+      New_Figure = QUADRADO;
       break;
    case TRIANGULO:
-      New_Shape = TRIANGULO;
+      New_Figure = TRIANGULO;
       break;
    case CIRCULO:
-      New_Shape = CIRCULO;
+      New_Figure = CIRCULO;
       break;
    case POLIGONO:
-      New_Shape = POLIGONO;
+      New_Figure = POLIGONO;
       break;
    case ELEVAR:
       if (Choose)
       {
-         for (auto it = ++shapes.begin(); it != shapes.end(); ++it)
+         for (auto it = ++figures.begin(); it != figures.end(); ++it)
          {
             if ((*it) == Choose)
             {
-               shapes.remove(Choose);
-               shapes.emplace(--it, Choose);
+               figures.remove(Choose);
+               figures.emplace(--it, Choose);
                break;
             }
          }
@@ -392,13 +338,13 @@ bool check_panel()
    case ABAIXAR:
       if (Choose)
       {
-         for (auto it = shapes.begin(); it != --shapes.end(); ++it)
+         for (auto it = figures.begin(); it != --figures.end(); ++it)
          {
             if ((*it) == Choose)
             {
                auto aux = ++it;
-               shapes.remove(Choose);
-               shapes.emplace(++aux, Choose);
+               figures.remove(Choose);
+               figures.emplace(++aux, Choose);
                break;
             }
          }
@@ -408,7 +354,7 @@ bool check_panel()
       if (Choose)
       {
          Drag = nullptr;
-         shapes.remove(Choose);
+         figures.remove(Choose);
          delete Choose;
          Choose = nullptr;
       }
@@ -422,7 +368,7 @@ bool check_panel()
    case COR:
       if (Choose)
       {
-         float *rgb = ret->get_rgb();
+         float *rgb = button->get_rgb();
          Choose->color(rgb[0], rgb[1], rgb[2]);
          delete rgb;
       }
@@ -432,6 +378,60 @@ bool check_panel()
       exit(1);
       break;
    }
+   click = true;
+   return true;
+}
+
+bool add_figure(int *figure)
+{
+   Figure *shp;
+   switch (*figure)
+   {
+   case -1:
+      return false;
+   case QUADRADO:
+      shp = new Square_figure(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, 100);
+      break;
+   case TRIANGULO:
+      shp = new Triangle_figure(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, 86.0254037844386); // 86.0254037844386 : height of an equilateral triangle with side: 100
+      break;
+   case CIRCULO:
+      shp = new Circle_figure(mouse_state->getX(), mouse_state->getY(), 50, 30);
+      break;
+   case POLIGONO:
+      // If clicks on first button, finishes polygon
+      if (newPolygon.size() > 0 &&
+          Point::distance(newPolygon.front().x, newPolygon.front().y, mouse_state->getX(), mouse_state->getY()) <= RADIUS_BALL)
+      {
+         int n = newPolygon.size();
+
+         if (n < 3)
+            return false;
+
+         float vx[n], vy[n];
+         int i = 0;
+         for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it, i++)
+         {
+            vx[i] = (*it).x;
+            vy[i] = (*it).y;
+         }
+         newPolygon.clear();
+         shp = new Polygon_figure(vx, vy, n);
+         break;
+      }
+      // Else, adds a new point
+      newPolygon.push_back(Vector2(mouse_state->getX(), mouse_state->getY()));
+      return true;
+   default:
+      std::cout << "Figura Inválida..." << std::endl;
+      exit(1);
+      break;
+   }
+   shp->color(0, 1, 0);
+   figures.push_front(shp);
+   Choose = shp;
+
+   *figure = -1;
    click = true;
    return true;
 }
@@ -448,7 +448,7 @@ void render()
 {
    CV::clear(0, 0, 0);
 
-   render_shapes();
+   render_figures();
 
    panel->render();
 
@@ -494,10 +494,13 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
 
    update();
 
+   // Left click
    if (button == 0)
    {
+      // Release
       if (state == 1)
       {
+         // Releases Choosen figure
          if (!click)
          {
             Choose = Drag;
@@ -505,24 +508,25 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
          }
          click = false;
       }
+      // Push
       else if (state == 0)
       {
+         // Check clicks on Panel
          if (check_panel())
-         {
             return;
-         }
 
-         if (add_shape(&New_Shape))
-         {
+         // Checks click to add new figure
+         if (add_figure(&New_Figure))
             return;
-         }
 
-         if (Choose && Choose->checkUpdateShape(*mouse_state))
+         // Checks click to drag figure
+         if (Choose && Choose->checkUpdateFigure(*mouse_state))
          {
             Drag = Choose;
             return;
          }
-         for (auto it = shapes.begin(); it != shapes.end(); ++it)
+         // Checks click to select figure
+         for (auto it = figures.begin(); it != figures.end(); ++it)
          {
             if ((*it)->isInside(*mouse_state))
             {
@@ -539,7 +543,7 @@ int main(void)
 {
    CV::init(&screenWidth, &screenHeight, "Teste trabalho 1");
 
-   New_Shape = -1;
+   New_Figure = -1;
 
    mouse_state = new Mouse();
 

@@ -2,12 +2,12 @@
 #ifndef __TRIANGLE_H__
 #define __TRIANGLE_H__
 
-#include "Shape.h"
+#include "Figure.h"
 
-class Triangle_shape : public Shape
+class Triangle_figure : public Figure
 {
 public:
-   Triangle_shape(float x1, float y1, float width, float height)
+   Triangle_figure(float x1, float y1, float width, float height)
    {
       vx = new float[3];
       vy = new float[3];
@@ -50,7 +50,7 @@ public:
       }
    }
 
-   ~Triangle_shape()
+   ~Triangle_figure()
    {
       delete vx;
       delete vy;

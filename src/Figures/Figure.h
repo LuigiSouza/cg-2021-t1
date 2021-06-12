@@ -1,16 +1,16 @@
 
-#ifndef __SHAPE_H__
-#define __SHAPE_H__
+#ifndef __FIGURE_H__
+#define __FIGURE_H__
 
 #define RADIUS_BALL 5
 
 #include "../gl_canvas2d.h"
 #include "../Handles/Point.h"
 #include "../Handles/Vector2.h"
-class Shape
+class Figure
 {
 private:
-   virtual void rotate_shape(Mouse mouse)
+   virtual void rotate_figure(Mouse mouse)
    {
       float base_x = update_x[0];
       float base_y = update_y[0];
@@ -25,7 +25,7 @@ private:
       midle_x = rotate.x + base_x;
       up_y = rotate.y + base_y;
 
-      // Translate shape points
+      // Translate figure points
       for (int i = 0; i < elems; i++)
       {
          rotate = Point::rotate(vx[i] - base_x,
@@ -53,7 +53,7 @@ private:
       this->angle += angle;
    }
 
-   virtual void resize_shape(Mouse mouse)
+   virtual void resize_figure(Mouse mouse)
    {
       // Update settings square
       for (int i = -1; i <= 1; i += 2)
@@ -116,19 +116,19 @@ private:
       this->proportion.set(proportion);
    }
 
-   virtual void update_shape(Mouse mouse)
+   virtual void update_figure(Mouse mouse)
    {
       if (resize_pos == -1)
       {
-         rotate_shape(mouse);
+         rotate_figure(mouse);
       }
       else
       {
-         resize_shape(mouse);
+         resize_figure(mouse);
       }
    }
 
-   virtual void move_shape(Mouse mouse)
+   virtual void move_figure(Mouse mouse)
    {
       for (int i = 0; i < elems; i++)
       {
@@ -157,50 +157,50 @@ public:
 
    virtual void update(Mouse mouse)
    {
-      if (updateShape)
+      if (updateFigure)
       {
-         update_shape(mouse);
+         update_figure(mouse);
       }
       else
       {
-         move_shape(mouse);
+         move_figure(mouse);
       }
    }
 
    // Checks if mouse is inside of a resize option
-   bool checkUpdateShape(Mouse mouse)
+   bool checkUpdateFigure(Mouse mouse)
    {
       for (int i = 0; i < 4; i++)
       {
          if (Point::distance(mouse.getX(), mouse.getY(), update_x[i], update_y[i]) < RADIUS_BALL)
          {
             resize_pos = i;
-            updateShape = true;
+            updateFigure = true;
             return true;
          }
       }
       if (Point::distance(mouse.getX(), mouse.getY(), midle_x, up_y) < RADIUS_BALL)
       {
          resize_pos = -1;
-         updateShape = true;
+         updateFigure = true;
          return true;
       }
-      updateShape = false;
+      updateFigure = false;
       return false;
    }
 
    void releaseMouse(void)
    {
-      updateShape = false;
+      updateFigure = false;
    }
 
-   // Change fill of shape
+   // Change fill of figure
    virtual void fill(void)
    {
       this->fill_flag = !this->fill_flag;
    }
 
-   // Checks if mouse is inside of shape
+   // Checks if mouse is inside of figure
    virtual bool isInside(Mouse mouse)
    {
       return Point::isInside(mouse.getX(), mouse.getY(), elems, vx, vy);
@@ -214,7 +214,7 @@ public:
       this->b = b;
    }
 
-   // Highlight the selected shape
+   // Highlight the selected figure
    virtual void high_light()
    {
       CV::color(0.5f + (1 + cos(this->gold)) / 4, 0.5f + (1 + cos(this->gold)) / 4, 0);
@@ -243,7 +243,7 @@ public:
       midle_x = rotate.x + base_x;
       up_y = rotate.y + base_y;
 
-      // Translate shape points
+      // Translate figure points
       for (int i = 0; i < elems; i++)
       {
          rotate = Point::rotate(vx[i] - base_x,
@@ -326,7 +326,7 @@ public:
       return rgb;
    }
 
-   virtual ~Shape()
+   virtual ~Figure()
    {
       delete vx;
       delete vy;
@@ -334,7 +334,7 @@ public:
    }
 
 protected:
-   // Coords of shape
+   // Coords of figure
    float *vx;
    float *vy;
    int elems;
@@ -349,7 +349,7 @@ protected:
    float midle_x;
    float up_y;
 
-   // Coords of shape relate to (0,0)
+   // Coords of figure relate to (0,0)
    Vector2 *draw;
 
    // Coords of resize sides relate to (0,0)
@@ -367,7 +367,7 @@ protected:
    Vector2 proportion;
 
    // Coords and flag of option selected
-   bool updateShape = false;
+   bool updateFigure = false;
    int resize_pos;
 };
 

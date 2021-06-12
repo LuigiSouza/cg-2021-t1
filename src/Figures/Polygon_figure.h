@@ -2,18 +2,16 @@
 #ifndef __POLYGON_H__
 #define __POLYGON_H__
 
-#include "Shape.h"
-#include "../gl_canvas2d.h"
-#include "../Handles/Point.h"
+#include "Figure.h"
 
-#include <iostream>
-#include <cmath>
-
-class Polygon_shape : public Shape
+class Polygon_figure : public Figure
 {
 public:
-   Polygon_shape(float x[], float y[], int elems)
+   Polygon_figure(float x[], float y[], int elems)
    {
+      if (elems < 3)
+         return;
+
       vx = new float[elems];
       vy = new float[elems];
 
@@ -63,7 +61,7 @@ public:
       }
    }
 
-   ~Polygon_shape()
+   ~Polygon_figure()
    {
       delete vx;
       delete vy;
