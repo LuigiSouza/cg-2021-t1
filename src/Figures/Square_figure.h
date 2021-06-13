@@ -39,13 +39,6 @@ public:
          update_base[i].set(draw[i]);
       }
    }
-
-   ~Square_figure()
-   {
-      delete vx;
-      delete vy;
-      delete draw;
-   }
 };
 
 #endif

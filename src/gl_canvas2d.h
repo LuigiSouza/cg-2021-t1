@@ -14,15 +14,16 @@
 #define PI 3.14159265359
 
 // Button functions
-#define QUADRADO 1
+#define QUADRADO  1
 #define TRIANGULO 2
-#define CIRCULO 3
-#define POLIGONO 4
-#define ELEVAR 5
-#define ABAIXAR 6
-#define DELETAR 7
-#define PREENCHER  8
-#define COR 9
+#define CIRCULO   3
+#define POLIGONO  4
+#define ELEVAR    5
+#define ABAIXAR   6
+#define SALVAR    7
+#define DELETAR   8 
+#define PREENCHER 9
+#define COR       10
 
 #define Y_CANVAS_CRESCE_PARA_CIMA 1
 

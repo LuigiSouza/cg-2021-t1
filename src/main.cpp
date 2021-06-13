@@ -46,6 +46,7 @@ Figure *Drag;
 Figure *Choose;
 
 // Variable to track new figure
+float new_fig_r = 0, new_fig_g = 1, new_fig_b = 0;
 int New_Figure;
 std::list<Vector2> newPolygon;
 
@@ -62,7 +63,7 @@ void render_cursor_polygon()
 {
    if (New_Figure != -1)
    {
-      CV::color(0, 1, 0);
+      CV::color(new_fig_r, new_fig_g, new_fig_b);
       CV::circleFill(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
       CV::color(0, 0, 0);
       CV::circle(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
@@ -78,7 +79,7 @@ void render_cursor_polygon()
          vx[i] = (*it).x;
          vy[i] = (*it).y;
       }
-      CV::color(0, 1, 0);
+      CV::color(new_fig_r, new_fig_g, new_fig_b);
       CV::polygonFill(vx, vy, newPolygon.size());
       CV::color(1, 1, 1);
       for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it)
@@ -106,7 +107,7 @@ void high_light()
 
 void load_file()
 {
-   std::ifstream infile("out.gr");
+   std::ifstream infile("figuras.gr");
 
    int n;
    infile >> n;
@@ -168,8 +169,12 @@ void load_file()
       shp->rotate_angle(angle);
 
       float r, g, b;
-      infile >> r >> g >> b;
+      bool fill;
+      infile >> r >> g >> b >> fill;
       shp->color(r, g, b);
+
+      if (!fill)
+         shp->fill();
 
       figures.push_back(shp);
    }
@@ -180,13 +185,13 @@ void load_file()
 void save_file()
 {
    FILE *fp;
-   if ((fp = fopen("out.gr", "w")) == NULL)
+   if ((fp = fopen("figuras.gr", "w")) == NULL)
    {
-      printf("Erro na abertura do arquivo.");
+      printf("Erro na abertura do arquivo.\n");
       return;
    }
-   else
-      printf("Arquivo aberto com sucesso.");
+   // else
+   //    printf("Arquivo aberto com sucesso.\n");
 
    int n = figures.size();
    fprintf(fp, "%d\n", n);
@@ -233,20 +238,22 @@ void save_file()
          }
          break;
       default:
-         std::cout << "Tipo inválido..." << std::endl;
+         std::cout << "Tipo invalido..." << std::endl;
          exit(1);
          break;
       }
       Vector2 proportion = (*it)->getProportion();
       float *rgb = (*it)->getRGB();
+      bool fill = (*it)->getFill();
 
-      fprintf(fp, "%f %f %f %.2f %.2f %.2f\n",
+      fprintf(fp, "%f %f %f %.2f %.2f %.2f %d\n",
               ang, proportion.x, proportion.y,
-              rgb[0], rgb[1], rgb[2]);
+              rgb[0], rgb[1], rgb[2], fill);
       delete rgb;
    }
 
    fclose(fp);
+   // printf("Arquivo salvo com sucesso.\n");
 }
 
 void create_panel()
@@ -266,6 +273,7 @@ void create_panel()
 
    panel->addButton(panel_w - 60, 115, 50, 30, ELEVAR);
    panel->addButton(panel_w - 60, 80, 50, 30, ABAIXAR);
+   panel->addButton(panel_w - 120, 60, 50, 30, SALVAR);
    panel->addButton(panel_w - 60, 45, 50, 30, DELETAR);
    panel->addButton(panel_w - 60, 10, 50, 30, PREENCHER);
 
@@ -275,11 +283,78 @@ void create_panel()
    }
 }
 
+void dispose()
+{
+   delete mouse_state;
+   delete Drag;
+   delete Choose;
+   delete panel;
+   figures.clear();
+}
+
 /***********************************************************
 *
 * Update Functions
 *
 ************************************************************/
+
+void delete_figure()
+{
+   if (Choose)
+   {
+      Drag = nullptr;
+      figures.remove(Choose);
+      delete Choose;
+      Choose = nullptr;
+   }
+}
+
+void up_figure()
+{
+   if (Choose)
+   {
+      for (auto it = ++figures.begin(); it != figures.end(); ++it)
+      {
+         if ((*it) == Choose)
+         {
+            if (mouse_state->getCtrl())
+            {
+               figures.remove(Choose);
+               figures.push_front(Choose);
+               break;
+            }
+
+            figures.remove(Choose);
+            figures.emplace(--it, Choose);
+            break;
+         }
+      }
+   }
+}
+
+void down_figure()
+{
+   if (Choose)
+   {
+      for (auto it = figures.begin(); it != --figures.end(); ++it)
+      {
+         if ((*it) == Choose)
+         {
+            if (mouse_state->getCtrl())
+            {
+               figures.remove(Choose);
+               figures.push_back(Choose);
+               break;
+            }
+
+            auto aux = ++it;
+            figures.remove(Choose);
+            figures.emplace(++aux, Choose);
+            break;
+         }
+      }
+   }
+}
 
 void update()
 {
@@ -291,13 +366,14 @@ void update()
 
 bool check_panel()
 {
-   if (panel->insidePanel(*mouse_state))
+
+   Botao *button = panel->buttonClicked(*mouse_state);
+
+   if (panel->insidePanel(*mouse_state) && (button == nullptr || button->get_function() != COR))
    {
       New_Figure = -1;
       newPolygon.clear();
    }
-
-   Botao *button = panel->buttonClicked(*mouse_state);
 
    if (button == nullptr)
    {
@@ -319,56 +395,16 @@ bool check_panel()
       New_Figure = POLIGONO;
       break;
    case ELEVAR:
-      if (Choose)
-      {
-         for (auto it = ++figures.begin(); it != figures.end(); ++it)
-         {
-            if ((*it) == Choose)
-            {
-               if (mouse_state->getCtrl())
-               {
-                  figures.remove(Choose);
-                  figures.push_front(Choose);
-                  break;
-               }
-
-               figures.remove(Choose);
-               figures.emplace(--it, Choose);
-               break;
-            }
-         }
-      }
+      up_figure();
       break;
    case ABAIXAR:
-      if (Choose)
-      {
-         for (auto it = figures.begin(); it != --figures.end(); ++it)
-         {
-            if ((*it) == Choose)
-            {
-               if (mouse_state->getCtrl())
-               {
-                  figures.remove(Choose);
-                  figures.push_back(Choose);
-                  break;
-               }
-
-               auto aux = ++it;
-               figures.remove(Choose);
-               figures.emplace(++aux, Choose);
-               break;
-            }
-         }
-      }
+      down_figure();
+      break;
+   case SALVAR:
+      save_file();
       break;
    case DELETAR:
-      if (Choose)
-      {
-         Drag = nullptr;
-         figures.remove(Choose);
-         delete Choose;
-         Choose = nullptr;
-      }
+      delete_figure();
       break;
    case PREENCHER:
       if (Choose)
@@ -377,7 +413,15 @@ bool check_panel()
       }
       break;
    case COR:
-      if (Choose)
+      if (New_Figure != -1)
+      {
+         float *rgb = button->get_rgb();
+         new_fig_r = rgb[0];
+         new_fig_g = rgb[1];
+         new_fig_b = rgb[2];
+         delete rgb;
+      }
+      else if (Choose)
       {
          float *rgb = button->get_rgb();
          Choose->color(rgb[0], rgb[1], rgb[2]);
@@ -393,7 +437,10 @@ bool check_panel()
    return true;
 }
 
-bool add_figure(int *figure)
+// Receives a figure code, and a bool. If receives
+// true, then the polygon will finish without need
+// to click at the first vertice.
+bool add_figure(int *figure, bool force)
 {
    Figure *shp;
    switch (*figure)
@@ -411,8 +458,8 @@ bool add_figure(int *figure)
       break;
    case POLIGONO:
       // If clicks on first button, finishes polygon
-      if (newPolygon.size() > 0 &&
-          Point::distance(newPolygon.front().x, newPolygon.front().y, mouse_state->getX(), mouse_state->getY()) <= RADIUS_BALL)
+      if (force || (newPolygon.size() > 0 &&
+                    Point::distance(newPolygon.front().x, newPolygon.front().y, mouse_state->getX(), mouse_state->getY()) <= RADIUS_BALL))
       {
          int n = newPolygon.size();
 
@@ -438,12 +485,14 @@ bool add_figure(int *figure)
       exit(1);
       break;
    }
-   shp->color(0, 1, 0);
+   shp->color(new_fig_r, new_fig_g, new_fig_b);
    figures.push_front(shp);
    Choose = shp;
 
+   new_fig_r = new_fig_b = 0;
+   new_fig_g = 1;
    *figure = -1;
-   click = true;
+   click = !force;
    return true;
 }
 
@@ -472,11 +521,55 @@ void render()
 void keyboard(int key)
 {
    // printf("\nTecla: %d", key);
+
+   bool fecha = true;
    switch (key)
    {
-   case 27: //finaliza programa
+   case 13: // enter: forces a polygon to finish before clicking in first vertice
+      add_figure(&New_Figure, true);
+      break;
+   case 19: // ctrl + s
       save_file();
-      exit(0);
+      break;
+   case 27: // finaliza programa após clicar duas vezes
+      if (Choose)
+      {
+         Choose = nullptr;
+         Drag = nullptr;
+         fecha = false;
+      }
+      if (newPolygon.size() > 0)
+      {
+         newPolygon.clear();
+         fecha = false;
+      }
+      if (New_Figure != -1)
+      {
+         New_Figure = -1;
+         fecha = false;
+      }
+
+      if (fecha)
+      {
+         dispose();
+         exit(0);
+      }
+
+      break;
+   case 43: // +
+      up_figure();
+      break;
+   case 45: // -
+      down_figure();
+      break;
+   case 102: // f
+      if (Choose)
+      {
+         Choose->fill();
+      }
+      break;
+   case 127: // del
+      delete_figure();
       break;
    case 214:
       mouse_state->setCtrl(true);
@@ -527,7 +620,7 @@ void mouse(int button, int state, int wheel, int direction, int x, int y)
             return;
 
          // Checks click to add new figure
-         if (add_figure(&New_Figure))
+         if (add_figure(&New_Figure, false))
             return;
 
          // Checks click to drag figure

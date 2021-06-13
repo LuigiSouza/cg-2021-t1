@@ -43,7 +43,7 @@ public:
 
     return ret;
   }
-
+  // Sets functions of button
   char get_function()
   {
     return this->function;

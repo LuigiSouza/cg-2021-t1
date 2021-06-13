@@ -4,9 +4,7 @@
 #include "Figure.h"
 
 class Circle_figure : public Figure
-{
-private:
-   /* data */
+{   
 public:
    Circle_figure(float x, float y, float radius, int div)
    {
@@ -50,13 +48,6 @@ public:
       {
          update_base[i].set(update_x[i] - update_x[0], update_y[i] - update_y[0]);
       }
-   }
-
-   ~Circle_figure()
-   {
-      delete vx;
-      delete vy;
-      delete draw;
    }
 };
 

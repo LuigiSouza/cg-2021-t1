@@ -48,6 +48,10 @@ void Botao::set_function(int function, int *rgb)
       a = "down";
       strcpy(label, a.c_str());
       return;
+   case SALVAR:
+      a = "save";
+      strcpy(label, a.c_str());
+      return;
    case DELETAR:
       a = "del";
       strcpy(label, a.c_str());
@@ -63,8 +67,6 @@ void Botao::set_function(int function, int *rgb)
    case QUADRADO:
       vx = new float[4];
       vy = new float[4];
-
-      std::cout << "quad " << std::endl;
 
       elems = 4;
       vx[0] = x + 10;
@@ -123,7 +125,7 @@ void Botao::set_function(int function, int *rgb)
 
       break;
    default:
-      std::cout << "Código de Figura Inválida..." << std::endl;
+      std::cout << "Codigo de Figura Invalida..." << std::endl;
       exit(1);
       break;
    }

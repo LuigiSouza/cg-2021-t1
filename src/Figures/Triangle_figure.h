@@ -49,13 +49,6 @@ public:
          update_base[i].set(update_x[i] - vx[0], update_y[i] - vy[0]);
       }
    }
-
-   ~Triangle_figure()
-   {
-      delete vx;
-      delete vy;
-      delete draw;
-   }
 };
 
 #endif

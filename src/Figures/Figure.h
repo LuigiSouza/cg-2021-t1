@@ -13,14 +13,15 @@ private:
    // Rotate Figure with mouse
    virtual void rotate_figure(Mouse mouse)
    {
-      float base_x = update_x[0];
-      float base_y = update_y[0];
+      float base_x = (update_x[0] + update_x[2]) / 2.0;
+      float base_y = (update_y[0] + update_y[2]) / 2.0;
 
       float vector_x = midle_x - base_x;
       float vector_y = up_y - base_y;
 
+      // Gets angle and rotates based on mouse
+      // coordinate and middle button option
       float angle = Point::getAngle(midle_x, up_y, mouse.getX(), mouse.getY(), base_x, base_y);
-
       Vector2 rotate = Point::rotate(vector_x, vector_y, angle);
 
       midle_x = rotate.x + base_x;
@@ -59,11 +60,12 @@ private:
       // Update settings square
       for (int i = -1; i <= 1; i += 2)
       {
+         // Vector with adjacents points realte to (0, 0)
          Vector2 aux_base = Vector2(
              update_x[(resize_pos + i + 4) % 4] - update_base[(resize_pos + i + 4) % 4].x,
              update_y[(resize_pos + i + 4) % 4] - update_base[(resize_pos + i + 4) % 4].y);
 
-         // Calculate adjacent vertices when updating another one
+         // Update adjacents points to keep proportion
          Vector2 ret = Point::perpendicular(
              update_base[(resize_pos + i + 4) % 4] + aux_base,
              update_base[(resize_pos + 2) % 4] + aux_base,
@@ -73,6 +75,7 @@ private:
          update_x[(resize_pos + i + 4) % 4] = ret.x;
          update_y[(resize_pos + i + 4) % 4] = ret.y;
       }
+      // Update selected vertice
       update_x[resize_pos] += mouse.moveX();
       update_y[resize_pos] += mouse.moveY();
 
@@ -84,7 +87,7 @@ private:
       Vector2 dist_side_to_center = Vector2(
           Point::distance(update_x[1] - base_x, update_y[1] - base_y, 0, 0),
           Point::distance(update_x[3] - base_x, update_y[3] - base_y, 0, 0));
-
+      // Calculate proportion between update box and base box
       Vector2 proportion = Vector2(
           dist_side_to_center.x / width_box * 1.0,
           dist_side_to_center.y / height_box * 1.0);
@@ -94,7 +97,8 @@ private:
 
       float dist_side_to_side_x = Point::distance(update_x[1] - base_x, update_y[1] - base_y, point1.x, point1.y);
       float dist_side_to_side_y = Point::distance(update_x[3] - base_x, update_y[3] - base_y, point2.x, point2.y);
-
+      // Checks if distance between an update option point to base option box at other side is bigger
+      // than this distance to center. If true, then the figure is mirrored in x ou y direction.
       proportion.set(
           dist_side_to_side_x > std::max(dist_side_to_center.x, width_box) ? proportion.x * -1 : proportion.x,
           dist_side_to_side_y > std::max(dist_side_to_center.y, height_box) ? proportion.y * -1 : proportion.y);
@@ -109,6 +113,7 @@ private:
          vx[i] = rotate.x + base_x;
          vy[i] = rotate.y + base_y;
       }
+      // Update rotate option (the middle one)
       float up_or_down_x = proportion.y < 0 ? -10 : 10;
       float up_or_down_y = proportion.y < 0 ? -10 : 10;
       midle_x = ((update_x[2] + update_x[3]) / 2) + sin(angle) * up_or_down_x * -1.0;
@@ -146,6 +151,7 @@ private:
    }
 
 public:
+   // Rotate fig given angle, used when loading a figure
    void rotate_angle(float angle)
    {
       angle = angle * (PI / 180.0);
@@ -188,12 +194,12 @@ public:
 
       this->angle = angle;
    }
-
+   // Resive fig given proportion, used when loading a figure
    void resize_proportion(Vector2 proportion)
    {
       float base_x = update_x[0];
       float base_y = update_y[0];
-      // Update coordinates
+      // Update figure coordinates
       for (int i = 0; i < elems; i++)
       {
          Vector2 relative = draw[i] * proportion;
@@ -201,7 +207,7 @@ public:
          vx[i] = relative.x + base_x;
          vy[i] = relative.y + base_y;
       }
-      // Update box coordinates
+      // Update resize options coordinates
       for (int i = 0; i < 4; i++)
       {
          Vector2 relative = update_base[i] * proportion;
@@ -227,6 +233,7 @@ public:
       CV::color(1, 1, 1);
    }
 
+   // Checks if are resizing/rotating or just mobing
    virtual void update(Mouse mouse)
    {
       if (updateFigure)
@@ -245,7 +252,8 @@ public:
       return Point::isInside(mouse.getX(), mouse.getY(), elems, vx, vy);
    }
 
-   // Checks if mouse is inside of a resize option
+   // Checks if mouse is inside of a
+   // resize option and set option
    bool checkUpdateFigure(Mouse mouse)
    {
       for (int i = 0; i < 4; i++)
@@ -302,8 +310,9 @@ public:
 
    // getters
    int getType() { return this->type; }
-
    int getElems() { return this->elems; }
+
+   bool getFill() { return this->fill_flag; }
 
    float getAngle() { return this->angle; }
 
@@ -342,7 +351,7 @@ protected:
    float *vy;
    int elems;
 
-   // Coords of resize options
+   // Coords of resize options (the box around)
    float update_x[4];
    float update_y[4];
    float width_box;
@@ -355,7 +364,7 @@ protected:
    // Coords of figure relate to (0,0)
    Vector2 *draw;
 
-   // Coords of resize sides relate to (0,0)
+   // Coords of resize options relate to (0,0)
    Vector2 update_base[4];
 
    float angle = 0.0;
@@ -369,7 +378,7 @@ protected:
    int type;
    Vector2 proportion;
 
-   // Coords and flag of option selected
+   // Coords and flag of resize option selected
    bool updateFigure = false;
    int resize_pos;
 };
