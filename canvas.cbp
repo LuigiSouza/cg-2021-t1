@@ -50,9 +50,10 @@
 		<Unit filename="src/Figures/Square_figure.h" />
 		<Unit filename="src/Figures/Triangle_figure.h" />
 		<Unit filename="src/Handles/HandleMouse.cpp" />
-		<Unit filename="src/Handles/Point.h" />
+		<Unit filename="src/Handles/HandleMouse.hpp" />
+		<Unit filename="src/Handles/Point.cpp" />
+		<Unit filename="src/Handles/Point.hpp" />
 		<Unit filename="src/Handles/Vector2.h" />
-		<Unit filename="src/Imagem.h" />
 		<Unit filename="src/Panel/Botao.cpp" />
 		<Unit filename="src/Panel/Botao.hpp" />
 		<Unit filename="src/Panel/Panel.cpp" />

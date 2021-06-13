@@ -208,12 +208,6 @@ void save_file()
       switch (n)
       {
       case QUADRADO:
-         fprintf(fp, "%.f %.f %.f %.f ",
-                 (*it)->getX(),
-                 (*it)->getY(),
-                 (*it)->getWidth(),
-                 (*it)->getHeight());
-         break;
       case TRIANGULO:
          fprintf(fp, "%.f %.f %.f %.f ",
                  (*it)->getX(),
