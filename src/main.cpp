@@ -13,6 +13,27 @@
 //
 // *********************************************************************/
 
+/***********************************************************************
+ *
+ * Funções básicas implementadas:
+ *
+- Inserir/excluir figura.
+- Cor da figura.
+- Preenchimento da figura.
+- Editar tamanho da figura.
+- Editar orientação da figura.
+- Enviar para frente/traz.
+- Salvar em arquivo e carregar de arquivo.
+
+/------------------------------------------------------------------------
+ *
+ * Funções extras implementadas:
+ *
+- Sinalizar qual figura está selecionada.
+- Rotacionar figura em qualquer ângulo.
+- Permitir inserir polígonos quaisquer.
+************************************************************************/
+
 #include <GL/glut.h>
 #include <GL/freeglut_ext.h> //callback da wheel do mouse.
 
@@ -35,7 +56,7 @@
 #include "Figures/Triangle_figure.h"
 #include "Figures/Figure.h"
 
-int screenWidth = 800, screenHeight = 680;
+int screenWidth = 1024, screenHeight = 768;
 Mouse *mouse_state;
 
 // Variable to keep chosen figure when clicking a panel option
@@ -64,9 +85,9 @@ void render_cursor_polygon()
    if (New_Figure != -1)
    {
       CV::color(new_fig_r, new_fig_g, new_fig_b);
-      CV::circleFill(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
+      CV::circleFill(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, SML_CIRCLE_DIV);
       CV::color(0, 0, 0);
-      CV::circle(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, 10);
+      CV::circle(mouse_state->getX(), mouse_state->getY(), RADIUS_BALL, SML_CIRCLE_DIV);
    }
 
    if (newPolygon.size() > 0)
@@ -83,7 +104,7 @@ void render_cursor_polygon()
       CV::polygonFill(vx, vy, newPolygon.size());
       CV::color(1, 1, 1);
       for (auto it = newPolygon.begin(); it != newPolygon.end(); ++it)
-         CV::circleFill((*it).x, (*it).y, 5, 10);
+         CV::circleFill((*it).x, (*it).y, RADIUS_BALL, SML_CIRCLE_DIV);
    }
 }
 
@@ -109,7 +130,7 @@ void load_file()
 {
    std::ifstream infile("figuras.gr");
 
-   int n;
+   int n = -1;
    infile >> n;
 
    Figure *shp;
@@ -136,7 +157,7 @@ void load_file()
       {
          float x, y, radius;
          infile >> x >> y >> radius;
-         shp = new Circle_figure(x, y, radius, 30);
+         shp = new Circle_figure(x, y, radius, BIG_CIRCLE_DIV);
       }
       else if (type == POLIGONO)
       {
@@ -157,7 +178,7 @@ void load_file()
       }
       else
       {
-         std::cout << "Tipo inválido..." << std::endl;
+         std::cout << "Tipo invalido..." << std::endl;
          exit(1);
       }
       float x, y, angle;
@@ -377,16 +398,10 @@ bool check_panel()
    switch (button->get_function())
    {
    case QUADRADO:
-      New_Figure = QUADRADO;
-      break;
    case TRIANGULO:
-      New_Figure = TRIANGULO;
-      break;
    case CIRCULO:
-      New_Figure = CIRCULO;
-      break;
    case POLIGONO:
-      New_Figure = POLIGONO;
+      New_Figure = button->get_function();
       break;
    case ELEVAR:
       up_figure();
@@ -437,18 +452,21 @@ bool check_panel()
 bool add_figure(int *figure, bool force)
 {
    Figure *shp;
+   float height;
+
    switch (*figure)
    {
    case -1:
       return false;
    case QUADRADO:
-      shp = new Square_figure(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, 100);
+      shp = new Square_figure(mouse_state->getX() - BASE_SIZE / 2.0, mouse_state->getY() - BASE_SIZE / 2.0, BASE_SIZE, BASE_SIZE);
       break;
    case TRIANGULO:
-      shp = new Triangle_figure(mouse_state->getX() - 50, mouse_state->getY() - 50, 100, 86.0254037844386); // 86.0254037844386 : height of an equilateral triangle with side: 100
+      height = (BASE_SIZE * 1.732050807) / 2.0; // 1.732050807 : sqrt of 3
+      shp = new Triangle_figure(mouse_state->getX() - BASE_SIZE / 2.0, mouse_state->getY() - BASE_SIZE / 2.0, BASE_SIZE, height); 
       break;
    case CIRCULO:
-      shp = new Circle_figure(mouse_state->getX(), mouse_state->getY(), 50, 30);
+      shp = new Circle_figure(mouse_state->getX(), mouse_state->getY(), BASE_SIZE / 2.0, BIG_CIRCLE_DIV);
       break;
    case POLIGONO:
       // If clicks on first button, finishes polygon

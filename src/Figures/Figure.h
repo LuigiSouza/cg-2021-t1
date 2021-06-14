@@ -2,8 +2,6 @@
 #ifndef __FIGURE_H__
 #define __FIGURE_H__
 
-#define RADIUS_BALL 5
-
 #include "../gl_canvas2d.h"
 #include "../Handles/Point.hpp"
 #include "../Handles/Vector2.h"
@@ -279,9 +277,9 @@ public:
       CV::color(1, 1, 1);
       for (int i = 0; i < 4; i++)
       {
-         CV::circleFill(update_x[i], update_y[i], RADIUS_BALL, 10);
+         CV::circleFill(update_x[i], update_y[i], RADIUS_BALL, SML_CIRCLE_DIV);
       }
-      CV::circleFill(midle_x, this->up_y, RADIUS_BALL, 10);
+      CV::circleFill(midle_x, this->up_y, RADIUS_BALL, SML_CIRCLE_DIV);
    }
 
    // getters

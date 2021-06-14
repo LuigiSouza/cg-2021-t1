@@ -1,4 +1,3 @@
-
 #ifndef __Square_figure_H__
 #define __Square_figure_H__
 

@@ -25,6 +25,12 @@
 #define PREENCHER 9
 #define COR       10
 
+#define BIG_CIRCLE_DIV 30
+#define SML_CIRCLE_DIV 10
+#define RADIUS_BALL 5
+
+#define BASE_SIZE 100
+
 #define Y_CANVAS_CRESCE_PARA_CIMA 1
 
 class CV //classe Canvas2D
