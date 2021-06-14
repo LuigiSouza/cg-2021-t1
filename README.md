@@ -82,7 +82,7 @@ Painel de cores: com a figura selecionada, é possível alterar a cor da figura 
 
 Up: trás a figura para frente em relação as demais (atalho: `+`)
   - Ao segurar a tecla `ctrl` e pressionar a opção, a figura irá para a primeira camada.
-  
+
 Down: trás a figura para trás em relação as demais (atalho: `-`)
   - Ao segurar a tecla `ctrl` e pressionar a opção, a figura irá para a última camada.
 
@@ -93,3 +93,5 @@ Save: salva as figuras no arquivo `figuras.gr` (atalho: `ctrl + s`)
 <p align="center"> 
   <img src="media/morefunctions.gif" alt="panel"/>
 </p>
+
+Para desmarcar a seleção de uma figura, basta pressionar a tecla `esc`. Caso nenhuma figura esteja selecionada, o programa irá se encerrar.
