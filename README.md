@@ -52,7 +52,7 @@ Para adicionar figuras simples (quadrados, triângulos e círculo), basta pressi
   <img src="media/gifex1.gif" alt="addfig"/>
 </p>
 
-Caso se desejar criar figuras complexas, é possível utilizar a opção de polígono, onde cada clique feito irá marcar o vértice a ser criado. Assim como nas figuras simples, é possível alterar a cor durante a seleção do polígono. Para finalizar a criação do polígono, é possível apertar a tecla `enter` no teclado ou pressionar o primeiro vértice adcionado.
+Caso se desejar criar figuras complexas, é possível utilizar a opção de polígono, onde cada clique feito irá marcar o vértice a ser criado. Assim como nas figuras simples, é possível alterar a cor durante a seleção do polígono. Para finalizar a criação do polígono, é possível apertar a tecla `enter` no teclado ou pressionar o primeiro vértice adicionado.
 
 Para cancelar a criação do polígono, basta apertar a tecla `esc` ou pressionar qualquer área do painel principal.
 
@@ -62,7 +62,7 @@ Para cancelar a criação do polígono, basta apertar a tecla `esc` ou pressiona
 
 ## Manipulação de Figuras
 
-Apenas com o mouse, é possível mudar a posição, tamanho e rotação de uma figura, além de alterar seu preenchimento, cor e trazer para frente ou para trás com auxilio do painel principal.
+Apenas com o mouse, é possível mudar a posição, tamanho e rotação de uma figura, além de alterar seu preenchimento, cor e trazer para frente ou para trás com auxílio do painel principal.
 
 Para se manipular a figura, basta clicar uma vez nela que a mesma ficará em um estado de 'selecionada'. Quando selecionada, uma caixa de opções aparecerá em sua volta, sendo os quatro pontos nos vértices da caixa responsáveis por alterar seu tamanho e proporção. Para alterá-la, basta segurar e arrastar o vértice desejado para a direção que desejar.
 
@@ -80,11 +80,13 @@ Com o botão central da caixa de edição, é possível rotacionar a figura em s
 
 Painel de cores: com a figura selecionada, é possível alterar a cor da figura pressionando a cor desejada nas opções centrais.
 
-Up: trás a figura para frente em relação as demais (atalho: `+`)
-  - Ao segurar a tecla `ctrl` e pressionar a opção, a figura irá para a primeira camada.
+Up: traz a figura para frente em relação as demais (atalho: `+`)
 
-Down: trás a figura para trás em relação as demais (atalho: `-`)
-  - Ao segurar a tecla `ctrl` e pressionar a opção, a figura irá para a última camada.
+- Ao segurar a tecla `ctrl` e pressionar a opção, a figura irá para a primeira camada.
+
+Down: traz a figura para trás em relação as demais (atalho: `-`)
+
+- Ao segurar a tecla `ctrl` e pressionar a opção, a figura irá para a última camada.
 
 Del: deleta a figura do programa (atalho: `del`)\
 Fill: altera o preenchimento da figura (atalho: `f`)\
@@ -95,3 +97,32 @@ Save: salva as figuras no arquivo `figuras.gr` (atalho: `ctrl + s`)
 </p>
 
 Para desmarcar a seleção de uma figura, basta pressionar a tecla `esc`. Caso nenhuma figura esteja selecionada, o programa irá se encerrar.
+
+## Figuras.gr
+
+É possível editar o arquivo `Figuras.gr` para iniciar o programa com qualquer figura desejada. Para isso, nessa seção será explicada como funciona o armazenamento do arquivo, dado o seguinte exemplo:
+
+```
+4
+2 330 240 100 86 -35.479248 0.722983 3.254326 0.00 0.50 0.50 1
+1 360 242 100 100 8632.186523 0.966980 1.697000 0.00 0.00 1.00 1
+3 595 255 50 -689.335632 -1.057209 3.452323 1.00 1.00 0.00 1
+4 6 249 344 0 16 86 0 153 71 108 152 75 67 3 70 309.239502 1.639585 1.503111 0.50 0.50 1.00 1
+```
+
+A primeira linha do arquivo, sempre conterá um inteiro N, que representará quantas figuras terão na figura, nesse caso, será 4 figuras.
+
+O primeiro valor das próximas linhas, representarão o formato da figura, seguindo a seguinte tabela:
+
+```
+QUADRADO  1
+TRIANGULO 2
+CIRCULO   3
+POLIGONO  4
+```
+
+Para cada figura, os próximas valores seguirão sua própria lógica. Para os valores 1 e 2, os dois primeiros valores serão o valor x e y do canto inferior esquerdo da figura, sendo os dois próximos números, respectivamente, a largura e a altura da figura. \
+Quando a o valor for o número 3, o círculo só necessitará de 3 valores, sendo eles: o x e y do seu centro e o valor de seu raio.\
+Para desenhar um polígono, a lógica é um pouco maior. Primeiro, após o número 4 (código da figura), vem o número de vértices da figura. A seguir, o valor x e y para ser tomado como base para desolcar, as próximas 6 coordenadas x e y escritas que estão em relação ao ponto (0,0). Ou seja, os vértices deve ser escritos em relação e proporção ao ponto (0,0) e assim, deselocados em x e y pelos primeiros valores lido.
+
+A próxima sequência de números é igual para todas as figuras: o próximo valor representa a rotação do objeto em graus. Em seguida, a proporção x e y do objeto, a fim de esticá-lo ou encolhe-lo, e por fim, o valores r, g, b para a cor do objeto e uma flag (0 ou 1) para dizer se o objeto será preenchido ou não.
